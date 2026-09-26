@@ -1,0 +1,99 @@
+{
+  "source": "Synthea synthetic FHIR R4 sample (no real patients)",
+  "patients": 109,
+  "bundles": 109,
+  "resources_seen": 118868,
+  "accepted": {
+    "Condition": 3540,
+    "MedicationRequest": 3858,
+    "Observation": 46214
+  },
+  "rejected": {
+    "Observation: quarantined: expected LOINC, got SNOMED CT": 91
+  },
+  "phi_leaks_found": 0,
+  "ingest_seconds": 3.84,
+  "audit": {
+    "entries": 3,
+    "chain_valid": true,
+    "denied": 1
+  },
+  "cohort_retrieval": {
+    "patients with diabetes": {
+      "cohort_size": 8,
+      "bm25_recall": 0.625,
+      "dense_recall": 0.25,
+      "code_filter_recall": 1.0
+    },
+    "patients with prediabetes": {
+      "cohort_size": 34,
+      "bm25_recall": 0.824,
+      "dense_recall": 0.618,
+      "code_filter_recall": 1.0
+    },
+    "patients with hypertension": {
+      "cohort_size": 20,
+      "bm25_recall": 0.8,
+      "dense_recall": 0.55,
+      "code_filter_recall": 1.0
+    },
+    "patients with obesity": {
+      "cohort_size": 44,
+      "bm25_recall": 0.932,
+      "dense_recall": 0.591,
+      "code_filter_recall": 1.0
+    },
+    "patients with anemia": {
+      "cohort_size": 35,
+      "bm25_recall": 0.886,
+      "dense_recall": 0.514,
+      "code_filter_recall": 1.0
+    },
+    "patients with chronic pain": {
+      "cohort_size": 27,
+      "bm25_recall": 0.852,
+      "dense_recall": 0.63,
+      "code_filter_recall": 1.0
+    },
+    "patients with ischemic heart disease": {
+      "cohort_size": 13,
+      "bm25_recall": 1.0,
+      "dense_recall": 0.846,
+      "code_filter_recall": 1.0
+    },
+    "patients with chronic kidney disease": {
+      "cohort_size": 6,
+      "bm25_recall": 1.0,
+      "dense_recall": 0.5,
+      "code_filter_recall": 1.0
+    },
+    "patients with a substance use problem": {
+      "cohort_size": 9,
+      "bm25_recall": 0.111,
+      "dense_recall": 0.222,
+      "code_filter_recall": 1.0
+    },
+    "patients taking an opioid": {
+      "cohort_size": 6,
+      "bm25_recall": 0.167,
+      "dense_recall": 0.5,
+      "code_filter_recall": 1.0
+    },
+    "patients taking metformin": {
+      "cohort_size": 4,
+      "bm25_recall": 1.0,
+      "dense_recall": 0.5,
+      "code_filter_recall": 1.0
+    },
+    "patients taking a statin": {
+      "cohort_size": 18,
+      "bm25_recall": 0.333,
+      "dense_recall": 0.5,
+      "code_filter_recall": 1.0
+    }
+  },
+  "mean_recall": {
+    "bm25_recall": 0.711,
+    "dense_recall": 0.518
+  }
+}

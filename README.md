@@ -35,6 +35,58 @@ Knowledge-base URLs provide provenance but do not, by themselves, validate every
 
 ---
 
+## FHIR interoperability and healthcare data safety (September 26, 2026)
+
+`interop/` ingests **FHIR R4 bundles** the way an EHR integration would, using the public
+[Synthea](https://synthea.mitre.org/) synthetic-patient sample (no real patients, no PHI).
+
+```
+FHIR Bundle ─▶ validate ─▶ normalize ─▶ terminology map ─▶ de-identify ─▶ role-gated access ─▶ audit log
+               (structure,   (Condition,   (SNOMED CT,        (keyed pseudonyms,  (analyst / researcher /  (hash-chained,
+                references,   MedicationReq, RxNorm → ingredient, year-only dates,  admin; small cells       tamper-evident)
+                code systems) Observation)   LOINC values)       90+ ages, no text)  suppressed <11)
+```
+
+**Run on the Synthea sample** (`python -m interop.evaluate`):
+
+| | |
+|---|---|
+| Patients / bundles | 109 / 109 |
+| FHIR resources processed | 118,868 in 3.84 s |
+| Accepted (Condition / MedicationRequest / Observation) | 3,540 / 3,858 / 46,214 |
+| Quarantined with a reason | 91 (Observations coded in SNOMED CT instead of LOINC) |
+| PHI leaks found by the scanner | 0 (names, phones, addresses, ZIPs, SSN/MRN identifiers, birth dates) |
+| Audit chain | valid; analyst request for row-level records denied and logged |
+
+Medication orders that point to a separate `Medication` resource (`medicationReference`) are resolved,
+and RxNorm display strings are reduced to ingredients (`Abuse-Deterrent 12 HR Oxycodone Hydrochloride 15 MG ...`
+→ `oxycodone hydrochloride`).
+
+**Why cohorts are defined by codes, not embeddings.** Each patient's de-identified summary was indexed for
+free-text search, and each cohort was retrieved at k = true cohort size:
+
+| Cohort | Size | BM25 recall | Dense recall | Code filter |
+|---|---|---|---|---|
+| patients with diabetes | 8 | 0.62 | 0.25 | 1.00 |
+| patients with prediabetes | 34 | 0.82 | 0.618 | 1.00 |
+| patients with hypertension | 20 | 0.80 | 0.55 | 1.00 |
+| patients with obesity | 44 | 0.93 | 0.591 | 1.00 |
+| patients with anemia | 35 | 0.89 | 0.514 | 1.00 |
+| patients with chronic pain | 27 | 0.85 | 0.63 | 1.00 |
+| patients with ischemic heart disease | 13 | 1.00 | 0.846 | 1.00 |
+| patients with chronic kidney disease | 6 | 1.00 | 0.5 | 1.00 |
+| patients with a substance use problem | 9 | 0.11 | 0.222 | 1.00 |
+| patients taking an opioid | 6 | 0.17 | 0.5 | 1.00 |
+| patients taking metformin | 4 | 1.00 | 0.5 | 1.00 |
+| patients taking a statin | 18 | 0.33 | 0.5 | 1.00 |
+
+Mean recall: BM25 0.711, dense 0.518. Semantic search misses
+a large share of each code-defined cohort (the substance-use cohort worst of all), so cohort selection uses
+terminology-mapped filters and embeddings are kept for exploration and summarization.
+
+Tests: `tests/test_fhir_interop.py` (ingestion, all three terminologies, de-identification of every identifier,
+leak scanner, dangling references, RBAC suppression, audit tampering detection) run in CI with no downloads.
+
 ## Architecture
 
 ```

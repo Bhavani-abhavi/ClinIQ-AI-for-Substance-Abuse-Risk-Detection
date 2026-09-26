@@ -21,3 +21,4 @@ data/*.json
 # Output files (optional if they want to push outputs)
 # outputs/*
 *.zip
+data/synthea/
