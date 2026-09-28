@@ -87,6 +87,49 @@ terminology-mapped filters and embeddings are kept for exploration and summariza
 Tests: `tests/test_fhir_interop.py` (ingestion, all three terminologies, de-identification of every identifier,
 leak scanner, dangling references, RBAC suppression, audit tampering detection) run in CI with no downloads.
 
+## Synthetic prior-authorization agent (September 27, 2026)
+
+`prior_auth/` is a **LangGraph** workflow that reviews prior-authorization requests against the FHIR
+records above. Policies and patients are both synthetic: the four policies were written for this project
+in the style of common payer criteria and are **not any payer's actual policy**. This is decision support
+for a clinical reviewer, not a coverage system.
+
+```
+intake ─▶ evaluate ─▶ write_draft ─▶ check ─┬─ REVISE (≤2) ─▶ write_draft
+          (RBAC-checked   (local LLM)   (deterministic)  └─▶ decide ─┬─ APPROVE ─▶ finalize (audit, ClaimResponse)
+           record fetch +                                            └─ PEND ─▶ clinician_review [interrupt] ─▶ finalize
+           criteria engine)
+```
+
+- **Criteria engine** (`engine.py`): each criterion is data (diagnosis, lab threshold with look-back,
+  step therapy, duration, BMI with comorbidity, age) and returns *met*, *not met* or *missing* with the
+  FHIR resources it relied on. *Missing* is a documentation request, not a denial.
+- **Only a clinician can deny.** The agent may auto-approve when every criterion is met; everything else
+  pauses at a `clinician_review` interrupt and resumes from its checkpoint. A denial from any role other
+  than `clinician` is refused and returned to the queue.
+- **The model writes, the engine decides.** The LLM drafts the reviewer summary. A deterministic checker
+  rejects drafts whose statuses, citations or numbers disagree with the engine, or that use denial
+  language; after two failed revisions the summary falls back to the engine's own wording.
+- **Minimum necessary access.** The agent runs as a `utilization_review` role that can read one patient's
+  de-identified record per request, and every read and decision lands in the hash-chained audit log.
+  Output is shaped after a FHIR R4 `ClaimResponse` (Da Vinci PAS style; not validated against the IG).
+
+**Run on the Synthea sample** (`python -m prior_auth.evaluate --model`):
+
+| | GLP-1 (T2D) | PCSK9 (lipids) | Lumbar MRI | Bariatric | Total |
+|---|---|---|---|---|---|
+| Requests (patients with a related problem) | 37 | 18 | 18 | 45 | 118 |
+| Auto-approved (all criteria met) | 1 | 13 | 15 | 2 | 31 |
+| Pended for a clinician | 36 | 5 | 3 | 43 | 87 |
+
+- **Auto-denials: 0.** Every pended case resumed from its checkpoint; the audit chain verified (236 entries).
+- **Missing-documentation test:** for each approved case, the evidence behind one criterion at a time was
+  deleted from the record. All **89/89** variants pended and named exactly the criteria that relied on
+  the deleted evidence.
+
+Tests: `tests/test_prior_auth.py` (engine statuses, auto-approval and audit, clinician-only denial, checker
+catches for status, citation, number and denial-language errors, revision and template fallback).
+
 ## Architecture
 
 ```
