@@ -1,4 +1,5 @@
 """FHIR ingestion, terminology mapping, de-identification, RBAC and audit chain (no network, no downloads)."""
+import re
 import json
 
 import pytest
@@ -39,8 +40,11 @@ def test_ingest_normalizes_all_three_terminologies():
     assert rep.accepted == {"Condition": 1, "MedicationRequest": 1, "Observation": 1} and not rep.rejected
     assert rec.conditions[0]["label"] == "Diabetes mellitus type 2" and rec.conditions[0]["semantic_tag"] == "disorder"
     assert rec.medications[0]["ingredient"] == "metformin hydrochloride"       # resolved via medicationReference
-    assert rec.observations[0] == {"system": "LOINC", "code": "4548-4", "label": "Hemoglobin A1c/Hemoglobin.total in Blood",
-                                   "value": 7.12, "unit": "%", "year": 2021}
+    obs = dict(rec.observations[0])
+    ref = obs.pop("ref")
+    assert obs == {"system": "LOINC", "code": "4548-4", "label": "Hemoglobin A1c/Hemoglobin.total in Blood",
+                   "value": 7.12, "unit": "%", "year": 2021}
+    assert re.fullmatch(r"Observation/[0-9a-f]{10}", ref)  # keyed hash, not the source resource id
 
 
 def test_deidentification_removes_every_identifier():

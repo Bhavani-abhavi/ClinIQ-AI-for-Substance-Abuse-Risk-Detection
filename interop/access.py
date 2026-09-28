@@ -5,6 +5,7 @@ Roles
   analyst     aggregate counts only; any cell under MIN_CELL is suppressed ("<11")
   researcher  de-identified row-level records (pseudonymous ids, year-level dates)
   admin       may run ingestion; same data view as researcher
+  utilization_review  one patient's full de-identified record per request (prior-authorization agent)
 
 Every call — allowed or denied — appends to the audit log. Each entry stores the SHA-256 of the
 previous entry, so editing or deleting any line breaks `verify()`.
@@ -24,6 +25,7 @@ PERMISSIONS = {
     "analyst": {"cohort_count", "aggregate"},
     "researcher": {"cohort_count", "aggregate", "records", "search"},
     "admin": {"cohort_count", "aggregate", "records", "search", "ingest"},
+    "utilization_review": {"patient_record"},
 }
 
 
@@ -87,6 +89,11 @@ class Gatekeeper:
         self._check(actor, role, "aggregate", {"cohort": name})
         counts = Counter(k for r in self.cohort(predicate) for k in key(r))
         return {k: (f"<{MIN_CELL}" if v < MIN_CELL and role == "analyst" else v) for k, v in counts.most_common()}
+
+    def patient_record(self, actor: str, role: str, pid: str, purpose: str):
+        """Minimum necessary: one record, for a stated purpose, logged whether allowed or not."""
+        self._check(actor, role, "patient_record", {"pid": pid, "purpose": purpose})
+        return next((r for r in self.records if r.pid == pid), None)
 
     def records_for(self, actor: str, role: str, name: str, predicate: Callable) -> list[dict]:
         self._check(actor, role, "records", {"cohort": name})

@@ -113,23 +113,24 @@ def ingest_bundle(bundle: dict, report: IngestReport, key: bytes | None = None) 
             report.rejected[f"{rt}: {reason}"] += 1
             continue
         report.accepted[rt] += 1
+        ref = f"{rt}/{pseudonym(r['id'], key)[2:12]}"  # keyed hash of the resource id, citable in reviews
         if rt == "Condition":
             c = primary_coding(r["code"], "SNOMED CT")
             label, tag = snomed_label(c.get("display", ""))
             status = ((r.get("clinicalStatus") or {}).get("coding") or [{}])[0].get("code", "unknown")
             rec.conditions.append({"system": "SNOMED CT", "code": c["code"], "label": label, "semantic_tag": tag,
-                                   "status": status, "onset_year": year(r.get("onsetDateTime"))})
+                                   "status": status, "onset_year": year(r.get("onsetDateTime")), "ref": ref})
         elif rt == "MedicationRequest":
             c = primary_coding(_med_concept(r, meds), "RxNorm")
             rec.medications.append({"system": "RxNorm", "code": c["code"], "display": c.get("display", ""),
                                     "ingredient": rxnorm_ingredient(c.get("display", "")),
-                                    "status": r.get("status"), "year": year(r.get("authoredOn"))})
+                                    "status": r.get("status"), "year": year(r.get("authoredOn")), "ref": ref})
         else:
             c = primary_coding(r["code"], "LOINC")
             q = r.get("valueQuantity") or {}
             rec.observations.append({"system": "LOINC", "code": c["code"], "label": c.get("display", ""),
                                      "value": round(q["value"], 2) if isinstance(q.get("value"), (int, float)) else None,
-                                     "unit": q.get("unit"), "year": year(r.get("effectiveDateTime"))})
+                                     "unit": q.get("unit"), "year": year(r.get("effectiveDateTime")), "ref": ref})
     out_text = rec.summary() + json.dumps(rec.conditions) + json.dumps(rec.medications) + json.dumps(rec.observations)
     report.leaks += [f"{rec.pid}: {v}" for v in scan_for_leaks(out_text, phi_values(p))]
     return rec

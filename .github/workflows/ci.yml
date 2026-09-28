@@ -33,7 +33,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           # Install test subset only (no GPU, no DB required)
-          pip install numpy scipy scikit-learn pytest
+          pip install numpy scipy scikit-learn pytest requests langgraph==0.2.76
 
       - name: Run unit tests
         run: |
