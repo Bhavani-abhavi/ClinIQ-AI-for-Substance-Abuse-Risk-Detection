@@ -1,0 +1,70 @@
+{
+ "generated": "2026-09-28 16:52",
+ "model": "distilbert-base-uncased",
+ "config": {
+  "csv": "/Users/rahulchowdary/Downloads/drugsComTest_raw.csv",
+  "model": "distilbert-base-uncased",
+  "epochs": 2.0,
+  "max_len": 128,
+  "batch": 16,
+  "lr": 3e-05,
+  "out": "outputs/bert_eval.json"
+ },
+ "data": {
+  "reviews": 52184,
+  "train": 7366,
+  "val": 818,
+  "eval": 600,
+  "eval_positive": 300,
+  "eval_by_category": {
+   "opioid": 60,
+   "withdrawal": 60,
+   "other_sud": 60,
+   "polysubstance": 60,
+   "alcohol": 60
+  }
+ },
+ "label_basis": "keyword_proxy_not_clinician_adjudicated",
+ "results_same_600": {
+  "bert_finetuned": {
+   "precision": 1.0,
+   "recall": 0.873,
+   "f1": 0.932,
+   "tp": 262,
+   "fp": 0,
+   "fn": 38,
+   "tn": 300,
+   "auroc": 0.99
+  },
+  "rule_based_static_keywords": {
+   "precision": 0.886,
+   "recall": 0.8,
+   "f1": 0.841,
+   "tp": 240,
+   "fp": 31,
+   "fn": 60,
+   "tn": 269
+  },
+  "rule_based_text_only": {
+   "precision": 0.871,
+   "recall": 0.677,
+   "f1": 0.762,
+   "tp": 203,
+   "fp": 30,
+   "fn": 97,
+   "tn": 270
+  }
+ },
+ "original_600_results_different_draw": "rules F1 0.854; embedding F1 0.670; LLM+RAG precision 0.938 / recall 0.400 (outputs/method_comparison_results.csv; non-SUD half sampled randomly, rules with ICD-10 augmentation)",
+ "timing_s": {
+  "train": 1793.8,
+  "predict_600": 10.91
+ },
+ "wandb": {
+  "mode": "offline",
+  "project": "cliniq-sud-detection",
+  "run": "distilbert-base-uncased-maxlen128-lr3e-05",
+  "run_id": "w3fu0hzl"
+ },
+ "inputs": "drug name + review text"
+}

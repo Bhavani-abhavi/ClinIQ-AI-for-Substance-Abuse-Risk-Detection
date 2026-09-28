@@ -22,3 +22,7 @@ data/*.json
 # outputs/*
 *.zip
 data/synthea/
+
+# Fine-tuned model weights and local W&B run files
+models/bert-sud*/
+outputs/wandb/

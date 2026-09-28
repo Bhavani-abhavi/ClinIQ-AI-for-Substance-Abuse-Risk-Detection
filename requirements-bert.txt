@@ -1,0 +1,9 @@
+# Optional: DistilBERT fine-tuning with Weights & Biases tracking (analysis/bert_classifier.py).
+# Versions used for the saved results in outputs/bert_eval*.json (CPU, macOS arm64).
+torch==2.5.1
+transformers==4.57.6
+datasets==5.0.1
+accelerate==1.15.0
+wandb==0.30.0
+pandas
+scikit-learn

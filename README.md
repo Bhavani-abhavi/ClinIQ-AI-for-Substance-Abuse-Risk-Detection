@@ -180,6 +180,36 @@ Public Review Rows (52,184)
 | Embedding (cosine ≥ 0.32) | 0.504 | **1.000** | 0.670 | 100% proxy recall in this sample; 295 false positives |
 | LLM + RAG (Claude Haiku) | **0.938** | 0.400 | 0.561 | Highest proxy precision in this saved sample |
 
+### Fine-tuned DistilBERT, tracked in Weights & Biases (September 28, 2026)
+
+`analysis/bert_classifier.py` fine-tunes `distilbert-base-uncased` with the Hugging Face Trainer (2 epochs, CPU) and logs each run to Weights & Biases, offline by default.
+
+- **Labels** are the project's keyword proxy (the review's condition, falling back to the drug name), not clinician adjudication.
+- **Test set:** the original recipe, rebuilt: 300 SUD-relevant reviews (the 60 most useful per signal category) plus 300 non-SUD reviews drawn with a fixed seed. Test review texts are removed from training, because the dataset repeats reviews under brand and generic names. Training uses 7,366 reviews (positives plus twice as many negatives) and 818 for validation.
+- **Rules** are the patient-voice keyword dictionary re-run on the same 600. The original benchmark also added ICD-10 terms from the database, which isn't available offline, so the rules score 0.841 here instead of 0.854.
+
+| Inputs | Method | Precision | Recall | F1 | AUROC |
+|---|---|---|---|---|---|
+| Review text only | Fine-tuned DistilBERT | 0.910 | 0.840 | **0.873** | 0.950 |
+| Review text only | Keyword rules | 0.871 | 0.677 | 0.762 | – |
+| Drug name + review | Fine-tuned DistilBERT | 1.000 | 0.873 | 0.932 | 0.990 |
+| Drug name + review | Keyword rules | 0.886 | 0.800 | 0.841 | – |
+
+**Read the text-only rows first.** The drug name can set the proxy label by itself (a Suboxone review is labeled SUD-relevant whatever it says), so the drug-name rows partly measure who learns drug names. On review text alone, the fine-tuned model finds 49 more of the 300 SUD-relevant reviews than the rules, with 5 fewer false positives.
+
+**Limits.** The test positives are the most-upvoted reviews in each category, which tend to be explicit. On the random validation split, text-only F1 is 0.755, so expect lower numbers on ordinary reviews. Both labels and test set are proxies; clinician-labeled data would be needed before any clinical use.
+
+Reproduce (about 30 minutes per run on an Apple M3 CPU; `pip install -r requirements-bert.txt`):
+
+```bash
+python -m analysis.bert_classifier --csv /path/to/drugsComTest_raw.csv                      # drug name + review
+python -m analysis.bert_classifier --csv /path/to/drugsComTest_raw.csv --text-only --out outputs/bert_eval_textonly.json
+python -m analysis.bert_classifier --csv /path/to/drugsComTest_raw.csv --rules-only --out outputs/bert_eval.json  # rule baselines only
+wandb sync outputs/wandb/offline-run-*                                                      # after `wandb login`
+```
+
+Results are in `outputs/bert_eval.json` and `outputs/bert_eval_textonly.json` (W&B runs `w3fu0hzl` and `nkcre65v`, project `cliniq-sud-detection`). Model weights (`models/bert-sud*/`) and W&B run files (`outputs/wandb/`) are not committed. `tests/test_bert_splits.py` checks the split, label and baseline logic without downloading a model.
+
 ### Temporal Findings (2008–2017 opioid crisis arc)
 
 - **3× volume surge**: SUD review volume from 2014→2016 tracks the CDC-documented fentanyl influx
@@ -208,6 +238,7 @@ Run `python -m pytest tests/ -q` for offline tests of the shared application bas
 | **Embeddings** | `all-MiniLM-L6-v2` (384-dim, sentence-transformers) |
 | **Vector DB** | PostgreSQL 16 + pgvector (IVFFlat index, cosine distance) |
 | **Clustering** | UMAP + HDBSCAN |
+| **Fine-tuning** | DistilBERT (Hugging Face Transformers + Trainer, PyTorch), Weights & Biases tracking |
 | **Data** | pandas, scikit-learn, scipy |
 | **Visualization** | Plotly, Streamlit |
 | **Infrastructure** | Docker Compose, GitHub Actions CI |
