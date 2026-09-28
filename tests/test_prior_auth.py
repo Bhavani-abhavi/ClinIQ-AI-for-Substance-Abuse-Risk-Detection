@@ -95,3 +95,13 @@ def test_unknown_patient_and_policy_are_rejected():
         submit(app, "P-none", "GLP1-T2D")
     with pytest.raises(ValueError):
         submit(app, "P-t1", "NOT-A-POLICY")
+
+
+def test_checker_parses_descriptive_citations_but_still_rejects_wrong_refs():
+    results = [r.__dict__ for r in evaluate(patient(), POLICIES["GLP1-T2D"])]
+    d = template_draft(results)
+    d["criteria"][0]["evidence"] = ["Condition/dx1: Diabetes mellitus type 2 (2019)"]  # ref plus its description
+    d["summary"] = "Semaglutide request reviewed in 2025."  # the review year comes from the prompt context
+    assert check_draft(d, results, context="Semaglutide 2025") == []
+    d["criteria"][0]["evidence"] = ["Condition/zz9: something else"]
+    assert "Condition/zz9" in " ".join(check_draft(d, results, context="Semaglutide 2025"))

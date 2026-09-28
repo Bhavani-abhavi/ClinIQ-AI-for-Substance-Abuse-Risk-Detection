@@ -31,10 +31,12 @@ ACTOR, ROLE = "pa-agent", "utilization_review"
 MAX_REVISIONS = 2
 DENIAL = re.compile(r"\b(deny|denied|denial|not covered|reject(ed)?|ineligible)\b", re.I)
 NUMBER = re.compile(r"(?<![A-Za-z/\-])\d+(?:\.\d+)?")
+REF = re.compile(r"\b(?:Condition|Observation|MedicationRequest)/[0-9A-Za-z]+\b")
 SYSTEM = ("You are a utilization-review assistant drafting a summary for a clinical reviewer. You receive "
           "the result of each coverage criterion, already decided by a rules engine, with evidence. For each "
           "criterion, restate its status exactly as given and explain it in one sentence using only the "
-          "evidence values shown; cite evidence by its ref. Then write a two-sentence summary. Never change a "
+          "evidence values shown; in \"evidence\" list only ref ids such as Condition/3e70d6beef. Then write a "
+          "two-sentence summary. Never change a "
           "status, never recommend denial, and never add facts that are not in the evidence. Return JSON only.")
 
 
@@ -62,8 +64,9 @@ def template_draft(results: list[dict]) -> dict:
                           "evidence": [e["ref"] for e in r["evidence"]]} for r in results]}
 
 
-def check_draft(draft: dict, results: list[dict]) -> list[str]:
-    """Deterministic critic: statuses, citations, numbers and tone must agree with the engine."""
+def check_draft(draft: dict, results: list[dict], context: str = "") -> list[str]:
+    """Deterministic critic: statuses, citations, numbers and tone must agree with the engine.
+    `context` is the request text the model was shown (service, review year); its numbers are allowed."""
     problems, by_id = [], {r["id"]: r for r in results}
     seen = set()
     for c in draft.get("criteria", []):
@@ -75,12 +78,13 @@ def check_draft(draft: dict, results: list[dict]) -> list[str]:
         if c.get("status") != r["status"]:
             problems.append(f"{r['id']}: status must be '{r['status']}', not '{c.get('status')}'")
         refs = {e["ref"] for e in r["evidence"]}
-        if bad := [x for x in c.get("evidence", []) if x not in refs]:
+        cited = [ref for x in c.get("evidence", []) for ref in (REF.findall(str(x)) or [str(x)])]
+        if bad := [x for x in cited if x not in refs]:
             problems.append(f"{r['id']}: evidence {bad} is not in this criterion's record evidence {sorted(refs)}")
     for r in results:
         if r["id"] not in seen:
             problems.append(f"{r['id']}: missing from the draft")
-    allowed = set()
+    allowed = {float(n) for n in NUMBER.findall(context)}
     for r in results:
         allowed |= {float(n) for n in NUMBER.findall(r["detail"] + " " + r["text"])}
         for e in r["evidence"]:
@@ -132,7 +136,7 @@ def build_workflow(records: list, drafter=None, audit: AuditLog | None = None, c
         policy = POLICIES[s["policy_id"]]
         lines = [f"Service requested: {policy['service']}", f"Review year: {s['year']}", "Criteria:"]
         for r in s["results"]:
-            ev = "; ".join(f"{e['ref']}: {e['what']}" + (f" = {e['value']} {e.get('unit') or ''}" if 'value' in e else "")
+            ev = "; ".join(f"[ref {e['ref']}] {e['what']}" + (f" = {e['value']} {e.get('unit') or ''}" if 'value' in e else "")
                            + (f" ({e['year']})" if e.get("year") else "") for e in r["evidence"]) or "none on file"
             lines.append(f"- {r['id']} {r['text']} | status: {r['status']} | engine detail: {r['detail']} | evidence: {ev}")
         if s.get("problems"):
@@ -145,7 +149,8 @@ def build_workflow(records: list, drafter=None, audit: AuditLog | None = None, c
                     "trace": [{"node": "draft", "error": True}]}
 
     def check(s: PAState) -> dict:
-        problems = check_draft(s["draft"], s["results"])
+        context = f"{POLICIES[s['policy_id']]['service']} {s['year']}"
+        problems = check_draft(s["draft"], s["results"], context)
         return {"problems": problems, "trace": [{"node": "check", "problems": len(problems)}]}
 
     def route_check(s: PAState) -> str:

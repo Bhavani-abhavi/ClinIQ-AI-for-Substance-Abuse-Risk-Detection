@@ -126,6 +126,13 @@ intake ─▶ evaluate ─▶ write_draft ─▶ check ─┬─ REVISE (≤2) �
 - **Missing-documentation test:** for each approved case, the evidence behind one criterion at a time was
   deleted from the record. All **89/89** variants pended and named exactly the criteria that relied on
   the deleted evidence.
+- **Drafting with a local model (Llama 3.2 3B via Ollama, CPU):** of 40 reviewer summaries, 30 passed the
+  checker on the first draft, 2 after one revision, and 8 fell back to the engine's own wording; no draft
+  that failed a check reached a reviewer. Median 42 s per case, about 540 prompt tokens. A first run
+  scored 0/40 because of a checker bug, not the model: citations were compared verbatim (the model wrote
+  `Condition/…: Chronic low back pain (2014)`) and the CPT code and review year shown in the prompt were
+  not allowed as numbers. The checker now extracts ref ids and allows numbers from the prompt; a test
+  covers it.
 
 Tests: `tests/test_prior_auth.py` (engine statuses, auto-approval and audit, clinician-only denial, checker
 catches for status, citation, number and denial-language errors, revision and template fallback).

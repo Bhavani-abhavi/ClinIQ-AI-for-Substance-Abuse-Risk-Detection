@@ -1,0 +1,2414 @@
+{
+ "generated": "2026-09-28 03:43",
+ "records": 109,
+ "cases": 118,
+ "note": "Synthetic policies on synthetic (Synthea) patients; decision support, not coverage decisions.",
+ "decisions": {
+  "GLP1-T2D": {
+   "APPROVE": 1,
+   "PEND": 36
+  },
+  "PCSK9-LIPID": {
+   "APPROVE": 13,
+   "PEND": 5
+  },
+  "MRI-LUMBAR": {
+   "APPROVE": 15,
+   "PEND": 3
+  },
+  "BARIATRIC": {
+   "APPROVE": 2,
+   "PEND": 43
+  }
+ },
+ "auto_approved": 31,
+ "pended_for_clinician": 87,
+ "auto_denied": 0,
+ "open_criteria": {
+  "C1 not_met": 76,
+  "C2 not_met": 37,
+  "C3 not_met": 35,
+  "C2 missing": 1
+ },
+ "resume_success": 1,
+ "perturbation": {
+  "tests": 89,
+  "correctly_pended_and_named": 89
+ },
+ "drafting": {
+  "model": "ollama:llama3.2",
+  "cases": 40,
+  "first_pass_clean": 30,
+  "clean_after_revision": 2,
+  "template_fallback": 8,
+  "latency_p50_s": 42.1,
+  "mean_prompt_tokens": 537.8,
+  "rows": [
+   {
+    "case": "case-028",
+    "policy": "GLP1-T2D",
+    "revisions": 0,
+    "first_pass_clean": true,
+    "final_source": "model",
+    "latency_s": 39.0,
+    "prompt_tokens": 360,
+    "output_tokens": 232
+   },
+   {
+    "case": "case-037",
+    "policy": "PCSK9-LIPID",
+    "revisions": 0,
+    "first_pass_clean": true,
+    "final_source": "model",
+    "latency_s": 153.8,
+    "prompt_tokens": 437,
+    "output_tokens": 348
+   },
+   {
+    "case": "case-039",
+    "policy": "PCSK9-LIPID",
+    "revisions": 0,
+    "first_pass_clean": true,
+    "final_source": "model",
+    "latency_s": 124.1,
+    "prompt_tokens": 375,
+    "output_tokens": 280
+   },
+   {
+    "case": "case-040",
+    "policy": "PCSK9-LIPID",
+    "revisions": 0,
+    "first_pass_clean": true,
+    "final_source": "model",
+    "latency_s": 91.9,
+    "prompt_tokens": 419,
+    "output_tokens": 302
+   },
+   {
+    "case": "case-041",
+    "policy": "PCSK9-LIPID",
+    "revisions": 0,
+    "first_pass_clean": true,
+    "final_source": "model",
+    "latency_s": 58.9,
+    "prompt_tokens": 431,
+    "output_tokens": 269
+   },
+   {
+    "case": "case-043",
+    "policy": "PCSK9-LIPID",
+    "revisions": 2,
+    "first_pass_clean": false,
+    "final_source": "template_after_failed_checks",
+    "latency_s": 117.7,
+    "prompt_tokens": 1125,
+    "output_tokens": 783
+   },
+   {
+    "case": "case-045",
+    "policy": "PCSK9-LIPID",
+    "revisions": 0,
+    "first_pass_clean": true,
+    "final_source": "model",
+    "latency_s": 32.6,
+    "prompt_tokens": 388,
+    "output_tokens": 254
+   },
+   {
+    "case": "case-046",
+    "policy": "PCSK9-LIPID",
+    "revisions": 0,
+    "first_pass_clean": true,
+    "final_source": "model",
+    "latency_s": 42.5,
+    "prompt_tokens": 393,
+    "output_tokens": 262
+   },
+   {
+    "case": "case-047",
+    "policy": "PCSK9-LIPID",
+    "revisions": 0,
+    "first_pass_clean": true,
+    "final_source": "model",
+    "latency_s": 40.9,
+    "prompt_tokens": 391,
+    "output_tokens": 259
+   },
+   {
+    "case": "case-049",
+    "policy": "PCSK9-LIPID",
+    "revisions": 0,
+    "first_pass_clean": true,
+    "final_source": "model",
+    "latency_s": 48.2,
+    "prompt_tokens": 389,
+    "output_tokens": 261
+   },
+   {
+    "case": "case-050",
+    "policy": "PCSK9-LIPID",
+    "revisions": 0,
+    "first_pass_clean": true,
+    "final_source": "model",
+    "latency_s": 34.0,
+    "prompt_tokens": 397,
+    "output_tokens": 271
+   },
+   {
+    "case": "case-051",
+    "policy": "PCSK9-LIPID",
+    "revisions": 0,
+    "first_pass_clean": true,
+    "final_source": "model",
+    "latency_s": 36.8,
+    "prompt_tokens": 390,
+    "output_tokens": 258
+   },
+   {
+    "case": "case-052",
+    "policy": "PCSK9-LIPID",
+    "revisions": 0,
+    "first_pass_clean": true,
+    "final_source": "model",
+    "latency_s": 34.7,
+    "prompt_tokens": 391,
+    "output_tokens": 265
+   },
+   {
+    "case": "case-054",
+    "policy": "PCSK9-LIPID",
+    "revisions": 0,
+    "first_pass_clean": true,
+    "final_source": "model",
+    "latency_s": 42.0,
+    "prompt_tokens": 415,
+    "output_tokens": 310
+   },
+   {
+    "case": "case-055",
+    "policy": "MRI-LUMBAR",
+    "revisions": 0,
+    "first_pass_clean": true,
+    "final_source": "model",
+    "latency_s": 30.9,
+    "prompt_tokens": 361,
+    "output_tokens": 262
+   },
+   {
+    "case": "case-056",
+    "policy": "MRI-LUMBAR",
+    "revisions": 0,
+    "first_pass_clean": true,
+    "final_source": "model",
+    "latency_s": 41.0,
+    "prompt_tokens": 360,
+    "output_tokens": 264
+   },
+   {
+    "case": "case-057",
+    "policy": "MRI-LUMBAR",
+    "revisions": 0,
+    "first_pass_clean": true,
+    "final_source": "model",
+    "latency_s": 50.6,
+    "prompt_tokens": 359,
+    "output_tokens": 263
+   },
+   {
+    "case": "case-059",
+    "policy": "MRI-LUMBAR",
+    "revisions": 0,
+    "first_pass_clean": true,
+    "final_source": "model",
+    "latency_s": 48.7,
+    "prompt_tokens": 358,
+    "output_tokens": 244
+   },
+   {
+    "case": "case-060",
+    "policy": "MRI-LUMBAR",
+    "revisions": 0,
+    "first_pass_clean": true,
+    "final_source": "model",
+    "latency_s": 42.2,
+    "prompt_tokens": 354,
+    "output_tokens": 272
+   },
+   {
+    "case": "case-061",
+    "policy": "MRI-LUMBAR",
+    "revisions": 1,
+    "first_pass_clean": false,
+    "final_source": "model",
+    "latency_s": 52.4,
+    "prompt_tokens": 651,
+    "output_tokens": 459
+   },
+   {
+    "case": "case-062",
+    "policy": "MRI-LUMBAR",
+    "revisions": 0,
+    "first_pass_clean": true,
+    "final_source": "model",
+    "latency_s": 33.0,
+    "prompt_tokens": 363,
+    "output_tokens": 278
+   },
+   {
+    "case": "case-063",
+    "policy": "MRI-LUMBAR",
+    "revisions": 0,
+    "first_pass_clean": true,
+    "final_source": "model",
+    "latency_s": 24.0,
+    "prompt_tokens": 357,
+    "output_tokens": 261
+   },
+   {
+    "case": "case-064",
+    "policy": "MRI-LUMBAR",
+    "revisions": 0,
+    "first_pass_clean": true,
+    "final_source": "model",
+    "latency_s": 42.5,
+    "prompt_tokens": 364,
+    "output_tokens": 299
+   },
+   {
+    "case": "case-065",
+    "policy": "MRI-LUMBAR",
+    "revisions": 0,
+    "first_pass_clean": true,
+    "final_source": "model",
+    "latency_s": 39.1,
+    "prompt_tokens": 353,
+    "output_tokens": 266
+   },
+   {
+    "case": "case-066",
+    "policy": "MRI-LUMBAR",
+    "revisions": 0,
+    "first_pass_clean": true,
+    "final_source": "model",
+    "latency_s": 26.2,
+    "prompt_tokens": 353,
+    "output_tokens": 258
+   },
+   {
+    "case": "case-067",
+    "policy": "MRI-LUMBAR",
+    "revisions": 0,
+    "first_pass_clean": true,
+    "final_source": "model",
+    "latency_s": 29.0,
+    "prompt_tokens": 358,
+    "output_tokens": 261
+   },
+   {
+    "case": "case-069",
+    "policy": "MRI-LUMBAR",
+    "revisions": 0,
+    "first_pass_clean": true,
+    "final_source": "model",
+    "latency_s": 23.7,
+    "prompt_tokens": 355,
+    "output_tokens": 256
+   },
+   {
+    "case": "case-070",
+    "policy": "MRI-LUMBAR",
+    "revisions": 0,
+    "first_pass_clean": true,
+    "final_source": "model",
+    "latency_s": 30.4,
+    "prompt_tokens": 339,
+    "output_tokens": 261
+   },
+   {
+    "case": "case-072",
+    "policy": "MRI-LUMBAR",
+    "revisions": 0,
+    "first_pass_clean": true,
+    "final_source": "model",
+    "latency_s": 25.4,
+    "prompt_tokens": 362,
+    "output_tokens": 282
+   },
+   {
+    "case": "case-098",
+    "policy": "BARIATRIC",
+    "revisions": 2,
+    "first_pass_clean": false,
+    "final_source": "template_after_failed_checks",
+    "latency_s": 46.7,
+    "prompt_tokens": 849,
+    "output_tokens": 444
+   },
+   {
+    "case": "case-102",
+    "policy": "BARIATRIC",
+    "revisions": 2,
+    "first_pass_clean": false,
+    "final_source": "template_after_failed_checks",
+    "latency_s": 48.1,
+    "prompt_tokens": 850,
+    "output_tokens": 503
+   },
+   {
+    "case": "case-000",
+    "policy": "GLP1-T2D",
+    "revisions": 0,
+    "first_pass_clean": true,
+    "final_source": "model",
+    "latency_s": 31.0,
+    "prompt_tokens": 446,
+    "output_tokens": 249
+   },
+   {
+    "case": "case-001",
+    "policy": "GLP1-T2D",
+    "revisions": 0,
+    "first_pass_clean": true,
+    "final_source": "model",
+    "latency_s": 33.7,
+    "prompt_tokens": 460,
+    "output_tokens": 288
+   },
+   {
+    "case": "case-002",
+    "policy": "GLP1-T2D",
+    "revisions": 2,
+    "first_pass_clean": false,
+    "final_source": "template_after_failed_checks",
+    "latency_s": 71.6,
+    "prompt_tokens": 1128,
+    "output_tokens": 781
+   },
+   {
+    "case": "case-003",
+    "policy": "GLP1-T2D",
+    "revisions": 2,
+    "first_pass_clean": false,
+    "final_source": "template_after_failed_checks",
+    "latency_s": 82.1,
+    "prompt_tokens": 1172,
+    "output_tokens": 801
+   },
+   {
+    "case": "case-004",
+    "policy": "GLP1-T2D",
+    "revisions": 2,
+    "first_pass_clean": false,
+    "final_source": "template_after_failed_checks",
+    "latency_s": 78.8,
+    "prompt_tokens": 1112,
+    "output_tokens": 812
+   },
+   {
+    "case": "case-005",
+    "policy": "GLP1-T2D",
+    "revisions": 0,
+    "first_pass_clean": true,
+    "final_source": "model",
+    "latency_s": 27.4,
+    "prompt_tokens": 404,
+    "output_tokens": 269
+   },
+   {
+    "case": "case-006",
+    "policy": "GLP1-T2D",
+    "revisions": 2,
+    "first_pass_clean": false,
+    "final_source": "template_after_failed_checks",
+    "latency_s": 74.5,
+    "prompt_tokens": 1103,
+    "output_tokens": 800
+   },
+   {
+    "case": "case-007",
+    "policy": "GLP1-T2D",
+    "revisions": 2,
+    "first_pass_clean": false,
+    "final_source": "template_after_failed_checks",
+    "latency_s": 130.1,
+    "prompt_tokens": 1100,
+    "output_tokens": 732
+   },
+   {
+    "case": "case-008",
+    "policy": "GLP1-T2D",
+    "revisions": 1,
+    "first_pass_clean": false,
+    "final_source": "model",
+    "latency_s": 91.6,
+    "prompt_tokens": 940,
+    "output_tokens": 614
+   }
+  ]
+ },
+ "audit_chain_valid": true,
+ "audit_entries": 236,
+ "rows": [
+  {
+   "case": "case-000",
+   "pid": "P-002b037068df",
+   "policy": "GLP1-T2D",
+   "decision": "PEND",
+   "status": "pended",
+   "reasons": [
+    "C2 not_met"
+   ],
+   "resumed_ok": true,
+   "year": 2026,
+   "statuses": {
+    "C1": "met",
+    "C2": "not_met",
+    "C3": "met"
+   }
+  },
+  {
+   "case": "case-001",
+   "pid": "P-00571ccaef71",
+   "policy": "GLP1-T2D",
+   "decision": "PEND",
+   "status": "pended",
+   "reasons": [
+    "C2 not_met"
+   ],
+   "resumed_ok": true,
+   "year": 2026,
+   "statuses": {
+    "C1": "met",
+    "C2": "not_met",
+    "C3": "met"
+   }
+  },
+  {
+   "case": "case-002",
+   "pid": "P-05ff2aa6775b",
+   "policy": "GLP1-T2D",
+   "decision": "PEND",
+   "status": "pended",
+   "reasons": [
+    "C1 not_met",
+    "C2 not_met",
+    "C3 not_met"
+   ],
+   "resumed_ok": true,
+   "year": 2026,
+   "statuses": {
+    "C1": "not_met",
+    "C2": "not_met",
+    "C3": "not_met"
+   }
+  },
+  {
+   "case": "case-003",
+   "pid": "P-089ab4c2964e",
+   "policy": "GLP1-T2D",
+   "decision": "PEND",
+   "status": "pended",
+   "reasons": [
+    "C1 not_met",
+    "C2 not_met",
+    "C3 not_met"
+   ],
+   "resumed_ok": true,
+   "year": 2026,
+   "statuses": {
+    "C1": "not_met",
+    "C2": "not_met",
+    "C3": "not_met"
+   }
+  },
+  {
+   "case": "case-004",
+   "pid": "P-0e60564d6f6f",
+   "policy": "GLP1-T2D",
+   "decision": "PEND",
+   "status": "pended",
+   "reasons": [
+    "C1 not_met",
+    "C2 not_met",
+    "C3 not_met"
+   ],
+   "resumed_ok": true,
+   "year": 2025,
+   "statuses": {
+    "C1": "not_met",
+    "C2": "not_met",
+    "C3": "not_met"
+   }
+  },
+  {
+   "case": "case-005",
+   "pid": "P-151790412f1d",
+   "policy": "GLP1-T2D",
+   "decision": "PEND",
+   "status": "pended",
+   "reasons": [
+    "C2 not_met"
+   ],
+   "resumed_ok": true,
+   "year": 2016,
+   "statuses": {
+    "C1": "met",
+    "C2": "not_met",
+    "C3": "met"
+   }
+  },
+  {
+   "case": "case-006",
+   "pid": "P-1629c6f05ea8",
+   "policy": "GLP1-T2D",
+   "decision": "PEND",
+   "status": "pended",
+   "reasons": [
+    "C1 not_met",
+    "C2 not_met",
+    "C3 not_met"
+   ],
+   "resumed_ok": true,
+   "year": 2025,
+   "statuses": {
+    "C1": "not_met",
+    "C2": "not_met",
+    "C3": "not_met"
+   }
+  },
+  {
+   "case": "case-007",
+   "pid": "P-1b55c84fe9c6",
+   "policy": "GLP1-T2D",
+   "decision": "PEND",
+   "status": "pended",
+   "reasons": [
+    "C1 not_met",
+    "C2 not_met",
+    "C3 not_met"
+   ],
+   "resumed_ok": true,
+   "year": 2025,
+   "statuses": {
+    "C1": "not_met",
+    "C2": "not_met",
+    "C3": "not_met"
+   }
+  },
+  {
+   "case": "case-008",
+   "pid": "P-27aa57bdfa9c",
+   "policy": "GLP1-T2D",
+   "decision": "PEND",
+   "status": "pended",
+   "reasons": [
+    "C2 not_met",
+    "C3 not_met"
+   ],
+   "resumed_ok": true,
+   "year": 2026,
+   "statuses": {
+    "C1": "met",
+    "C2": "not_met",
+    "C3": "not_met"
+   }
+  },
+  {
+   "case": "case-009",
+   "pid": "P-34e8417d28bd",
+   "policy": "GLP1-T2D",
+   "decision": "PEND",
+   "status": "pended",
+   "reasons": [
+    "C1 not_met",
+    "C2 not_met",
+    "C3 not_met"
+   ],
+   "resumed_ok": true,
+   "year": 2026,
+   "statuses": {
+    "C1": "not_met",
+    "C2": "not_met",
+    "C3": "not_met"
+   }
+  },
+  {
+   "case": "case-010",
+   "pid": "P-3a16e160edbf",
+   "policy": "GLP1-T2D",
+   "decision": "PEND",
+   "status": "pended",
+   "reasons": [
+    "C1 not_met",
+    "C2 not_met",
+    "C3 not_met"
+   ],
+   "resumed_ok": true,
+   "year": 2026,
+   "statuses": {
+    "C1": "not_met",
+    "C2": "not_met",
+    "C3": "not_met"
+   }
+  },
+  {
+   "case": "case-011",
+   "pid": "P-3ad2ed5501b5",
+   "policy": "GLP1-T2D",
+   "decision": "PEND",
+   "status": "pended",
+   "reasons": [
+    "C1 not_met",
+    "C2 not_met",
+    "C3 not_met"
+   ],
+   "resumed_ok": true,
+   "year": 2026,
+   "statuses": {
+    "C1": "not_met",
+    "C2": "not_met",
+    "C3": "not_met"
+   }
+  },
+  {
+   "case": "case-012",
+   "pid": "P-3bd8386c7ac9",
+   "policy": "GLP1-T2D",
+   "decision": "PEND",
+   "status": "pended",
+   "reasons": [
+    "C1 not_met",
+    "C2 not_met",
+    "C3 not_met"
+   ],
+   "resumed_ok": true,
+   "year": 2026,
+   "statuses": {
+    "C1": "not_met",
+    "C2": "not_met",
+    "C3": "not_met"
+   }
+  },
+  {
+   "case": "case-013",
+   "pid": "P-413aaceb598e",
+   "policy": "GLP1-T2D",
+   "decision": "PEND",
+   "status": "pended",
+   "reasons": [
+    "C1 not_met",
+    "C2 not_met",
+    "C3 not_met"
+   ],
+   "resumed_ok": true,
+   "year": 2025,
+   "statuses": {
+    "C1": "not_met",
+    "C2": "not_met",
+    "C3": "not_met"
+   }
+  },
+  {
+   "case": "case-014",
+   "pid": "P-4543b0ee37a0",
+   "policy": "GLP1-T2D",
+   "decision": "PEND",
+   "status": "pended",
+   "reasons": [
+    "C1 not_met",
+    "C2 not_met",
+    "C3 not_met"
+   ],
+   "resumed_ok": true,
+   "year": 2026,
+   "statuses": {
+    "C1": "not_met",
+    "C2": "not_met",
+    "C3": "not_met"
+   }
+  },
+  {
+   "case": "case-015",
+   "pid": "P-475469429a01",
+   "policy": "GLP1-T2D",
+   "decision": "PEND",
+   "status": "pended",
+   "reasons": [
+    "C1 not_met",
+    "C2 not_met",
+    "C3 not_met"
+   ],
+   "resumed_ok": true,
+   "year": 2026,
+   "statuses": {
+    "C1": "not_met",
+    "C2": "not_met",
+    "C3": "not_met"
+   }
+  },
+  {
+   "case": "case-016",
+   "pid": "P-4d815a0f475e",
+   "policy": "GLP1-T2D",
+   "decision": "PEND",
+   "status": "pended",
+   "reasons": [
+    "C1 not_met",
+    "C2 not_met",
+    "C3 not_met"
+   ],
+   "resumed_ok": true,
+   "year": 2025,
+   "statuses": {
+    "C1": "not_met",
+    "C2": "not_met",
+    "C3": "not_met"
+   }
+  },
+  {
+   "case": "case-017",
+   "pid": "P-6c795f1ae20b",
+   "policy": "GLP1-T2D",
+   "decision": "PEND",
+   "status": "pended",
+   "reasons": [
+    "C1 not_met",
+    "C2 not_met",
+    "C3 not_met"
+   ],
+   "resumed_ok": true,
+   "year": 2026,
+   "statuses": {
+    "C1": "not_met",
+    "C2": "not_met",
+    "C3": "not_met"
+   }
+  },
+  {
+   "case": "case-018",
+   "pid": "P-6df15a1d5752",
+   "policy": "GLP1-T2D",
+   "decision": "PEND",
+   "status": "pended",
+   "reasons": [
+    "C1 not_met",
+    "C2 not_met",
+    "C3 not_met"
+   ],
+   "resumed_ok": true,
+   "year": 2026,
+   "statuses": {
+    "C1": "not_met",
+    "C2": "not_met",
+    "C3": "not_met"
+   }
+  },
+  {
+   "case": "case-019",
+   "pid": "P-714503d831e8",
+   "policy": "GLP1-T2D",
+   "decision": "PEND",
+   "status": "pended",
+   "reasons": [
+    "C1 not_met",
+    "C2 not_met",
+    "C3 not_met"
+   ],
+   "resumed_ok": true,
+   "year": 2026,
+   "statuses": {
+    "C1": "not_met",
+    "C2": "not_met",
+    "C3": "not_met"
+   }
+  },
+  {
+   "case": "case-020",
+   "pid": "P-71d3266d9ff9",
+   "policy": "GLP1-T2D",
+   "decision": "PEND",
+   "status": "pended",
+   "reasons": [
+    "C2 not_met"
+   ],
+   "resumed_ok": true,
+   "year": 2026,
+   "statuses": {
+    "C1": "met",
+    "C2": "not_met",
+    "C3": "met"
+   }
+  },
+  {
+   "case": "case-021",
+   "pid": "P-750e28ee4d45",
+   "policy": "GLP1-T2D",
+   "decision": "PEND",
+   "status": "pended",
+   "reasons": [
+    "C1 not_met",
+    "C2 not_met",
+    "C3 not_met"
+   ],
+   "resumed_ok": true,
+   "year": 2025,
+   "statuses": {
+    "C1": "not_met",
+    "C2": "not_met",
+    "C3": "not_met"
+   }
+  },
+  {
+   "case": "case-022",
+   "pid": "P-7676934d2efe",
+   "policy": "GLP1-T2D",
+   "decision": "PEND",
+   "status": "pended",
+   "reasons": [
+    "C1 not_met",
+    "C2 not_met",
+    "C3 not_met"
+   ],
+   "resumed_ok": true,
+   "year": 2025,
+   "statuses": {
+    "C1": "not_met",
+    "C2": "not_met",
+    "C3": "not_met"
+   }
+  },
+  {
+   "case": "case-023",
+   "pid": "P-8dbe8f74334a",
+   "policy": "GLP1-T2D",
+   "decision": "PEND",
+   "status": "pended",
+   "reasons": [
+    "C1 not_met",
+    "C2 not_met",
+    "C3 not_met"
+   ],
+   "resumed_ok": true,
+   "year": 2026,
+   "statuses": {
+    "C1": "not_met",
+    "C2": "not_met",
+    "C3": "not_met"
+   }
+  },
+  {
+   "case": "case-024",
+   "pid": "P-92b1000649bc",
+   "policy": "GLP1-T2D",
+   "decision": "PEND",
+   "status": "pended",
+   "reasons": [
+    "C1 not_met",
+    "C2 not_met",
+    "C3 not_met"
+   ],
+   "resumed_ok": true,
+   "year": 2026,
+   "statuses": {
+    "C1": "not_met",
+    "C2": "not_met",
+    "C3": "not_met"
+   }
+  },
+  {
+   "case": "case-025",
+   "pid": "P-a598471f9681",
+   "policy": "GLP1-T2D",
+   "decision": "PEND",
+   "status": "pended",
+   "reasons": [
+    "C1 not_met",
+    "C2 not_met",
+    "C3 not_met"
+   ],
+   "resumed_ok": true,
+   "year": 2025,
+   "statuses": {
+    "C1": "not_met",
+    "C2": "not_met",
+    "C3": "not_met"
+   }
+  },
+  {
+   "case": "case-026",
+   "pid": "P-a5cbeb9a93f0",
+   "policy": "GLP1-T2D",
+   "decision": "PEND",
+   "status": "pended",
+   "reasons": [
+    "C1 not_met",
+    "C2 not_met",
+    "C3 not_met"
+   ],
+   "resumed_ok": true,
+   "year": 2025,
+   "statuses": {
+    "C1": "not_met",
+    "C2": "not_met",
+    "C3": "not_met"
+   }
+  },
+  {
+   "case": "case-027",
+   "pid": "P-a7853805cad4",
+   "policy": "GLP1-T2D",
+   "decision": "PEND",
+   "status": "pended",
+   "reasons": [
+    "C1 not_met",
+    "C2 not_met",
+    "C3 not_met"
+   ],
+   "resumed_ok": true,
+   "year": 2026,
+   "statuses": {
+    "C1": "not_met",
+    "C2": "not_met",
+    "C3": "not_met"
+   }
+  },
+  {
+   "case": "case-028",
+   "pid": "P-a8b372b29f66",
+   "policy": "GLP1-T2D",
+   "decision": "APPROVE",
+   "status": "approved",
+   "reasons": [],
+   "resumed_ok": null,
+   "year": 2026,
+   "statuses": {
+    "C1": "met",
+    "C2": "met",
+    "C3": "met"
+   }
+  },
+  {
+   "case": "case-029",
+   "pid": "P-b7acbc86ec12",
+   "policy": "GLP1-T2D",
+   "decision": "PEND",
+   "status": "pended",
+   "reasons": [
+    "C2 not_met",
+    "C3 not_met"
+   ],
+   "resumed_ok": true,
+   "year": 2026,
+   "statuses": {
+    "C1": "met",
+    "C2": "not_met",
+    "C3": "not_met"
+   }
+  },
+  {
+   "case": "case-030",
+   "pid": "P-bc9e7a6970dc",
+   "policy": "GLP1-T2D",
+   "decision": "PEND",
+   "status": "pended",
+   "reasons": [
+    "C1 not_met",
+    "C2 not_met",
+    "C3 not_met"
+   ],
+   "resumed_ok": true,
+   "year": 2026,
+   "statuses": {
+    "C1": "not_met",
+    "C2": "not_met",
+    "C3": "not_met"
+   }
+  },
+  {
+   "case": "case-031",
+   "pid": "P-c6bbdf1056af",
+   "policy": "GLP1-T2D",
+   "decision": "PEND",
+   "status": "pended",
+   "reasons": [
+    "C1 not_met",
+    "C2 not_met",
+    "C3 not_met"
+   ],
+   "resumed_ok": true,
+   "year": 2026,
+   "statuses": {
+    "C1": "not_met",
+    "C2": "not_met",
+    "C3": "not_met"
+   }
+  },
+  {
+   "case": "case-032",
+   "pid": "P-d3d9a19c07c2",
+   "policy": "GLP1-T2D",
+   "decision": "PEND",
+   "status": "pended",
+   "reasons": [
+    "C1 not_met",
+    "C2 not_met",
+    "C3 not_met"
+   ],
+   "resumed_ok": true,
+   "year": 2025,
+   "statuses": {
+    "C1": "not_met",
+    "C2": "not_met",
+    "C3": "not_met"
+   }
+  },
+  {
+   "case": "case-033",
+   "pid": "P-dce1a331521c",
+   "policy": "GLP1-T2D",
+   "decision": "PEND",
+   "status": "pended",
+   "reasons": [
+    "C1 not_met",
+    "C2 not_met",
+    "C3 not_met"
+   ],
+   "resumed_ok": true,
+   "year": 2024,
+   "statuses": {
+    "C1": "not_met",
+    "C2": "not_met",
+    "C3": "not_met"
+   }
+  },
+  {
+   "case": "case-034",
+   "pid": "P-dd48c37cd673",
+   "policy": "GLP1-T2D",
+   "decision": "PEND",
+   "status": "pended",
+   "reasons": [
+    "C2 missing",
+    "C3 not_met"
+   ],
+   "resumed_ok": true,
+   "year": 2023,
+   "statuses": {
+    "C1": "met",
+    "C2": "missing",
+    "C3": "not_met"
+   }
+  },
+  {
+   "case": "case-035",
+   "pid": "P-ff644fc0d5d7",
+   "policy": "GLP1-T2D",
+   "decision": "PEND",
+   "status": "pended",
+   "reasons": [
+    "C1 not_met",
+    "C2 not_met",
+    "C3 not_met"
+   ],
+   "resumed_ok": true,
+   "year": 2025,
+   "statuses": {
+    "C1": "not_met",
+    "C2": "not_met",
+    "C3": "not_met"
+   }
+  },
+  {
+   "case": "case-036",
+   "pid": "P-ffcd8e522691",
+   "policy": "GLP1-T2D",
+   "decision": "PEND",
+   "status": "pended",
+   "reasons": [
+    "C1 not_met",
+    "C2 not_met",
+    "C3 not_met"
+   ],
+   "resumed_ok": true,
+   "year": 2025,
+   "statuses": {
+    "C1": "not_met",
+    "C2": "not_met",
+    "C3": "not_met"
+   }
+  },
+  {
+   "case": "case-037",
+   "pid": "P-00571ccaef71",
+   "policy": "PCSK9-LIPID",
+   "decision": "APPROVE",
+   "status": "approved",
+   "reasons": [],
+   "resumed_ok": null,
+   "year": 2026,
+   "statuses": {
+    "C1": "met",
+    "C2": "met",
+    "C3": "met"
+   }
+  },
+  {
+   "case": "case-038",
+   "pid": "P-089ab4c2964e",
+   "policy": "PCSK9-LIPID",
+   "decision": "PEND",
+   "status": "pended",
+   "reasons": [
+    "C1 not_met",
+    "C2 not_met"
+   ],
+   "resumed_ok": true,
+   "year": 2026,
+   "statuses": {
+    "C1": "not_met",
+    "C2": "not_met",
+    "C3": "met"
+   }
+  },
+  {
+   "case": "case-039",
+   "pid": "P-0e60564d6f6f",
+   "policy": "PCSK9-LIPID",
+   "decision": "APPROVE",
+   "status": "approved",
+   "reasons": [],
+   "resumed_ok": null,
+   "year": 2025,
+   "statuses": {
+    "C1": "met",
+    "C2": "met",
+    "C3": "met"
+   }
+  },
+  {
+   "case": "case-040",
+   "pid": "P-27aa57bdfa9c",
+   "policy": "PCSK9-LIPID",
+   "decision": "APPROVE",
+   "status": "approved",
+   "reasons": [],
+   "resumed_ok": null,
+   "year": 2026,
+   "statuses": {
+    "C1": "met",
+    "C2": "met",
+    "C3": "met"
+   }
+  },
+  {
+   "case": "case-041",
+   "pid": "P-632f58576f8c",
+   "policy": "PCSK9-LIPID",
+   "decision": "APPROVE",
+   "status": "approved",
+   "reasons": [],
+   "resumed_ok": null,
+   "year": 2026,
+   "statuses": {
+    "C1": "met",
+    "C2": "met",
+    "C3": "met"
+   }
+  },
+  {
+   "case": "case-042",
+   "pid": "P-6c795f1ae20b",
+   "policy": "PCSK9-LIPID",
+   "decision": "PEND",
+   "status": "pended",
+   "reasons": [
+    "C2 not_met"
+   ],
+   "resumed_ok": true,
+   "year": 2026,
+   "statuses": {
+    "C1": "met",
+    "C2": "not_met",
+    "C3": "met"
+   }
+  },
+  {
+   "case": "case-043",
+   "pid": "P-71d3266d9ff9",
+   "policy": "PCSK9-LIPID",
+   "decision": "APPROVE",
+   "status": "approved",
+   "reasons": [],
+   "resumed_ok": null,
+   "year": 2026,
+   "statuses": {
+    "C1": "met",
+    "C2": "met",
+    "C3": "met"
+   }
+  },
+  {
+   "case": "case-044",
+   "pid": "P-9c946ad0e1ce",
+   "policy": "PCSK9-LIPID",
+   "decision": "PEND",
+   "status": "pended",
+   "reasons": [
+    "C1 not_met"
+   ],
+   "resumed_ok": true,
+   "year": 2026,
+   "statuses": {
+    "C1": "not_met",
+    "C2": "met",
+    "C3": "met"
+   }
+  },
+  {
+   "case": "case-045",
+   "pid": "P-a5cbeb9a93f0",
+   "policy": "PCSK9-LIPID",
+   "decision": "APPROVE",
+   "status": "approved",
+   "reasons": [],
+   "resumed_ok": null,
+   "year": 2025,
+   "statuses": {
+    "C1": "met",
+    "C2": "met",
+    "C3": "met"
+   }
+  },
+  {
+   "case": "case-046",
+   "pid": "P-a8365d9b4574",
+   "policy": "PCSK9-LIPID",
+   "decision": "APPROVE",
+   "status": "approved",
+   "reasons": [],
+   "resumed_ok": null,
+   "year": 2025,
+   "statuses": {
+    "C1": "met",
+    "C2": "met",
+    "C3": "met"
+   }
+  },
+  {
+   "case": "case-047",
+   "pid": "P-b643acee5cba",
+   "policy": "PCSK9-LIPID",
+   "decision": "APPROVE",
+   "status": "approved",
+   "reasons": [],
+   "resumed_ok": null,
+   "year": 2026,
+   "statuses": {
+    "C1": "met",
+    "C2": "met",
+    "C3": "met"
+   }
+  },
+  {
+   "case": "case-048",
+   "pid": "P-b7acbc86ec12",
+   "policy": "PCSK9-LIPID",
+   "decision": "PEND",
+   "status": "pended",
+   "reasons": [
+    "C1 not_met"
+   ],
+   "resumed_ok": true,
+   "year": 2026,
+   "statuses": {
+    "C1": "not_met",
+    "C2": "met",
+    "C3": "met"
+   }
+  },
+  {
+   "case": "case-049",
+   "pid": "P-d3d9a19c07c2",
+   "policy": "PCSK9-LIPID",
+   "decision": "APPROVE",
+   "status": "approved",
+   "reasons": [],
+   "resumed_ok": null,
+   "year": 2025,
+   "statuses": {
+    "C1": "met",
+    "C2": "met",
+    "C3": "met"
+   }
+  },
+  {
+   "case": "case-050",
+   "pid": "P-de543966867a",
+   "policy": "PCSK9-LIPID",
+   "decision": "APPROVE",
+   "status": "approved",
+   "reasons": [],
+   "resumed_ok": null,
+   "year": 2025,
+   "statuses": {
+    "C1": "met",
+    "C2": "met",
+    "C3": "met"
+   }
+  },
+  {
+   "case": "case-051",
+   "pid": "P-e802f450835a",
+   "policy": "PCSK9-LIPID",
+   "decision": "APPROVE",
+   "status": "approved",
+   "reasons": [],
+   "resumed_ok": null,
+   "year": 2015,
+   "statuses": {
+    "C1": "met",
+    "C2": "met",
+    "C3": "met"
+   }
+  },
+  {
+   "case": "case-052",
+   "pid": "P-ea3e6128f582",
+   "policy": "PCSK9-LIPID",
+   "decision": "APPROVE",
+   "status": "approved",
+   "reasons": [],
+   "resumed_ok": null,
+   "year": 2026,
+   "statuses": {
+    "C1": "met",
+    "C2": "met",
+    "C3": "met"
+   }
+  },
+  {
+   "case": "case-053",
+   "pid": "P-f41e0ced9443",
+   "policy": "PCSK9-LIPID",
+   "decision": "PEND",
+   "status": "pended",
+   "reasons": [
+    "C1 not_met"
+   ],
+   "resumed_ok": true,
+   "year": 2025,
+   "statuses": {
+    "C1": "not_met",
+    "C2": "met",
+    "C3": "met"
+   }
+  },
+  {
+   "case": "case-054",
+   "pid": "P-ffcd8e522691",
+   "policy": "PCSK9-LIPID",
+   "decision": "APPROVE",
+   "status": "approved",
+   "reasons": [],
+   "resumed_ok": null,
+   "year": 2025,
+   "statuses": {
+    "C1": "met",
+    "C2": "met",
+    "C3": "met"
+   }
+  },
+  {
+   "case": "case-055",
+   "pid": "P-151790412f1d",
+   "policy": "MRI-LUMBAR",
+   "decision": "APPROVE",
+   "status": "approved",
+   "reasons": [],
+   "resumed_ok": null,
+   "year": 2016,
+   "statuses": {
+    "C1": "met",
+    "C2": "met",
+    "C3": "met"
+   }
+  },
+  {
+   "case": "case-056",
+   "pid": "P-19cd91be91a3",
+   "policy": "MRI-LUMBAR",
+   "decision": "APPROVE",
+   "status": "approved",
+   "reasons": [],
+   "resumed_ok": null,
+   "year": 2025,
+   "statuses": {
+    "C1": "met",
+    "C2": "met",
+    "C3": "met"
+   }
+  },
+  {
+   "case": "case-057",
+   "pid": "P-3bd8386c7ac9",
+   "policy": "MRI-LUMBAR",
+   "decision": "APPROVE",
+   "status": "approved",
+   "reasons": [],
+   "resumed_ok": null,
+   "year": 2026,
+   "statuses": {
+    "C1": "met",
+    "C2": "met",
+    "C3": "met"
+   }
+  },
+  {
+   "case": "case-058",
+   "pid": "P-59edde37b097",
+   "policy": "MRI-LUMBAR",
+   "decision": "PEND",
+   "status": "pended",
+   "reasons": [
+    "C3 not_met"
+   ],
+   "resumed_ok": true,
+   "year": 2026,
+   "statuses": {
+    "C1": "met",
+    "C2": "met",
+    "C3": "not_met"
+   }
+  },
+  {
+   "case": "case-059",
+   "pid": "P-714503d831e8",
+   "policy": "MRI-LUMBAR",
+   "decision": "APPROVE",
+   "status": "approved",
+   "reasons": [],
+   "resumed_ok": null,
+   "year": 2026,
+   "statuses": {
+    "C1": "met",
+    "C2": "met",
+    "C3": "met"
+   }
+  },
+  {
+   "case": "case-060",
+   "pid": "P-75aaf394f281",
+   "policy": "MRI-LUMBAR",
+   "decision": "APPROVE",
+   "status": "approved",
+   "reasons": [],
+   "resumed_ok": null,
+   "year": 2026,
+   "statuses": {
+    "C1": "met",
+    "C2": "met",
+    "C3": "met"
+   }
+  },
+  {
+   "case": "case-061",
+   "pid": "P-7c5bf6f0bbde",
+   "policy": "MRI-LUMBAR",
+   "decision": "APPROVE",
+   "status": "approved",
+   "reasons": [],
+   "resumed_ok": null,
+   "year": 2026,
+   "statuses": {
+    "C1": "met",
+    "C2": "met",
+    "C3": "met"
+   }
+  },
+  {
+   "case": "case-062",
+   "pid": "P-8dbe8f74334a",
+   "policy": "MRI-LUMBAR",
+   "decision": "APPROVE",
+   "status": "approved",
+   "reasons": [],
+   "resumed_ok": null,
+   "year": 2026,
+   "statuses": {
+    "C1": "met",
+    "C2": "met",
+    "C3": "met"
+   }
+  },
+  {
+   "case": "case-063",
+   "pid": "P-925a3c340276",
+   "policy": "MRI-LUMBAR",
+   "decision": "APPROVE",
+   "status": "approved",
+   "reasons": [],
+   "resumed_ok": null,
+   "year": 2026,
+   "statuses": {
+    "C1": "met",
+    "C2": "met",
+    "C3": "met"
+   }
+  },
+  {
+   "case": "case-064",
+   "pid": "P-9c946ad0e1ce",
+   "policy": "MRI-LUMBAR",
+   "decision": "APPROVE",
+   "status": "approved",
+   "reasons": [],
+   "resumed_ok": null,
+   "year": 2026,
+   "statuses": {
+    "C1": "met",
+    "C2": "met",
+    "C3": "met"
+   }
+  },
+  {
+   "case": "case-065",
+   "pid": "P-a3b4796f993c",
+   "policy": "MRI-LUMBAR",
+   "decision": "APPROVE",
+   "status": "approved",
+   "reasons": [],
+   "resumed_ok": null,
+   "year": 2025,
+   "statuses": {
+    "C1": "met",
+    "C2": "met",
+    "C3": "met"
+   }
+  },
+  {
+   "case": "case-066",
+   "pid": "P-a7853805cad4",
+   "policy": "MRI-LUMBAR",
+   "decision": "APPROVE",
+   "status": "approved",
+   "reasons": [],
+   "resumed_ok": null,
+   "year": 2026,
+   "statuses": {
+    "C1": "met",
+    "C2": "met",
+    "C3": "met"
+   }
+  },
+  {
+   "case": "case-067",
+   "pid": "P-ad0e4bd12d12",
+   "policy": "MRI-LUMBAR",
+   "decision": "APPROVE",
+   "status": "approved",
+   "reasons": [],
+   "resumed_ok": null,
+   "year": 2018,
+   "statuses": {
+    "C1": "met",
+    "C2": "met",
+    "C3": "met"
+   }
+  },
+  {
+   "case": "case-068",
+   "pid": "P-d3d9a19c07c2",
+   "policy": "MRI-LUMBAR",
+   "decision": "PEND",
+   "status": "pended",
+   "reasons": [
+    "C3 not_met"
+   ],
+   "resumed_ok": true,
+   "year": 2025,
+   "statuses": {
+    "C1": "met",
+    "C2": "met",
+    "C3": "not_met"
+   }
+  },
+  {
+   "case": "case-069",
+   "pid": "P-d5e88602621b",
+   "policy": "MRI-LUMBAR",
+   "decision": "APPROVE",
+   "status": "approved",
+   "reasons": [],
+   "resumed_ok": null,
+   "year": 2026,
+   "statuses": {
+    "C1": "met",
+    "C2": "met",
+    "C3": "met"
+   }
+  },
+  {
+   "case": "case-070",
+   "pid": "P-ec2fcfa067ee",
+   "policy": "MRI-LUMBAR",
+   "decision": "APPROVE",
+   "status": "approved",
+   "reasons": [],
+   "resumed_ok": null,
+   "year": 2026,
+   "statuses": {
+    "C1": "met",
+    "C2": "met",
+    "C3": "met"
+   }
+  },
+  {
+   "case": "case-071",
+   "pid": "P-ff644fc0d5d7",
+   "policy": "MRI-LUMBAR",
+   "decision": "PEND",
+   "status": "pended",
+   "reasons": [
+    "C3 not_met"
+   ],
+   "resumed_ok": true,
+   "year": 2025,
+   "statuses": {
+    "C1": "met",
+    "C2": "met",
+    "C3": "not_met"
+   }
+  },
+  {
+   "case": "case-072",
+   "pid": "P-ffcd8e522691",
+   "policy": "MRI-LUMBAR",
+   "decision": "APPROVE",
+   "status": "approved",
+   "reasons": [],
+   "resumed_ok": null,
+   "year": 2025,
+   "statuses": {
+    "C1": "met",
+    "C2": "met",
+    "C3": "met"
+   }
+  },
+  {
+   "case": "case-073",
+   "pid": "P-002b037068df",
+   "policy": "BARIATRIC",
+   "decision": "PEND",
+   "status": "pended",
+   "reasons": [
+    "C1 not_met"
+   ],
+   "resumed_ok": true,
+   "year": 2026,
+   "statuses": {
+    "C1": "not_met",
+    "C2": "met"
+   }
+  },
+  {
+   "case": "case-074",
+   "pid": "P-00571ccaef71",
+   "policy": "BARIATRIC",
+   "decision": "PEND",
+   "status": "pended",
+   "reasons": [
+    "C1 not_met"
+   ],
+   "resumed_ok": true,
+   "year": 2026,
+   "statuses": {
+    "C1": "not_met",
+    "C2": "met"
+   }
+  },
+  {
+   "case": "case-075",
+   "pid": "P-05ff2aa6775b",
+   "policy": "BARIATRIC",
+   "decision": "PEND",
+   "status": "pended",
+   "reasons": [
+    "C1 not_met"
+   ],
+   "resumed_ok": true,
+   "year": 2026,
+   "statuses": {
+    "C1": "not_met",
+    "C2": "met"
+   }
+  },
+  {
+   "case": "case-076",
+   "pid": "P-089ab4c2964e",
+   "policy": "BARIATRIC",
+   "decision": "PEND",
+   "status": "pended",
+   "reasons": [
+    "C1 not_met"
+   ],
+   "resumed_ok": true,
+   "year": 2026,
+   "statuses": {
+    "C1": "not_met",
+    "C2": "met"
+   }
+  },
+  {
+   "case": "case-077",
+   "pid": "P-0e60564d6f6f",
+   "policy": "BARIATRIC",
+   "decision": "PEND",
+   "status": "pended",
+   "reasons": [
+    "C1 not_met"
+   ],
+   "resumed_ok": true,
+   "year": 2025,
+   "statuses": {
+    "C1": "not_met",
+    "C2": "met"
+   }
+  },
+  {
+   "case": "case-078",
+   "pid": "P-0e81f32796d9",
+   "policy": "BARIATRIC",
+   "decision": "PEND",
+   "status": "pended",
+   "reasons": [
+    "C1 not_met"
+   ],
+   "resumed_ok": true,
+   "year": 2026,
+   "statuses": {
+    "C1": "not_met",
+    "C2": "met"
+   }
+  },
+  {
+   "case": "case-079",
+   "pid": "P-151790412f1d",
+   "policy": "BARIATRIC",
+   "decision": "PEND",
+   "status": "pended",
+   "reasons": [
+    "C1 not_met"
+   ],
+   "resumed_ok": true,
+   "year": 2016,
+   "statuses": {
+    "C1": "not_met",
+    "C2": "met"
+   }
+  },
+  {
+   "case": "case-080",
+   "pid": "P-1629c6f05ea8",
+   "policy": "BARIATRIC",
+   "decision": "PEND",
+   "status": "pended",
+   "reasons": [
+    "C1 not_met"
+   ],
+   "resumed_ok": true,
+   "year": 2025,
+   "statuses": {
+    "C1": "not_met",
+    "C2": "met"
+   }
+  },
+  {
+   "case": "case-081",
+   "pid": "P-1b55c84fe9c6",
+   "policy": "BARIATRIC",
+   "decision": "PEND",
+   "status": "pended",
+   "reasons": [
+    "C1 not_met"
+   ],
+   "resumed_ok": true,
+   "year": 2025,
+   "statuses": {
+    "C1": "not_met",
+    "C2": "met"
+   }
+  },
+  {
+   "case": "case-082",
+   "pid": "P-2312e4762975",
+   "policy": "BARIATRIC",
+   "decision": "PEND",
+   "status": "pended",
+   "reasons": [
+    "C1 not_met"
+   ],
+   "resumed_ok": true,
+   "year": 2026,
+   "statuses": {
+    "C1": "not_met",
+    "C2": "met"
+   }
+  },
+  {
+   "case": "case-083",
+   "pid": "P-34e8417d28bd",
+   "policy": "BARIATRIC",
+   "decision": "PEND",
+   "status": "pended",
+   "reasons": [
+    "C1 not_met"
+   ],
+   "resumed_ok": true,
+   "year": 2026,
+   "statuses": {
+    "C1": "not_met",
+    "C2": "met"
+   }
+  },
+  {
+   "case": "case-084",
+   "pid": "P-3a16e160edbf",
+   "policy": "BARIATRIC",
+   "decision": "PEND",
+   "status": "pended",
+   "reasons": [
+    "C1 not_met"
+   ],
+   "resumed_ok": true,
+   "year": 2026,
+   "statuses": {
+    "C1": "not_met",
+    "C2": "met"
+   }
+  },
+  {
+   "case": "case-085",
+   "pid": "P-3bd8386c7ac9",
+   "policy": "BARIATRIC",
+   "decision": "PEND",
+   "status": "pended",
+   "reasons": [
+    "C1 not_met"
+   ],
+   "resumed_ok": true,
+   "year": 2026,
+   "statuses": {
+    "C1": "not_met",
+    "C2": "met"
+   }
+  },
+  {
+   "case": "case-086",
+   "pid": "P-413aaceb598e",
+   "policy": "BARIATRIC",
+   "decision": "PEND",
+   "status": "pended",
+   "reasons": [
+    "C1 not_met"
+   ],
+   "resumed_ok": true,
+   "year": 2025,
+   "statuses": {
+    "C1": "not_met",
+    "C2": "met"
+   }
+  },
+  {
+   "case": "case-087",
+   "pid": "P-4543b0ee37a0",
+   "policy": "BARIATRIC",
+   "decision": "PEND",
+   "status": "pended",
+   "reasons": [
+    "C1 not_met"
+   ],
+   "resumed_ok": true,
+   "year": 2026,
+   "statuses": {
+    "C1": "not_met",
+    "C2": "met"
+   }
+  },
+  {
+   "case": "case-088",
+   "pid": "P-4d815a0f475e",
+   "policy": "BARIATRIC",
+   "decision": "PEND",
+   "status": "pended",
+   "reasons": [
+    "C1 not_met"
+   ],
+   "resumed_ok": true,
+   "year": 2025,
+   "statuses": {
+    "C1": "not_met",
+    "C2": "met"
+   }
+  },
+  {
+   "case": "case-089",
+   "pid": "P-59edde37b097",
+   "policy": "BARIATRIC",
+   "decision": "PEND",
+   "status": "pended",
+   "reasons": [
+    "C1 not_met"
+   ],
+   "resumed_ok": true,
+   "year": 2026,
+   "statuses": {
+    "C1": "not_met",
+    "C2": "met"
+   }
+  },
+  {
+   "case": "case-090",
+   "pid": "P-632f58576f8c",
+   "policy": "BARIATRIC",
+   "decision": "PEND",
+   "status": "pended",
+   "reasons": [
+    "C1 not_met"
+   ],
+   "resumed_ok": true,
+   "year": 2026,
+   "statuses": {
+    "C1": "not_met",
+    "C2": "met"
+   }
+  },
+  {
+   "case": "case-091",
+   "pid": "P-6c795f1ae20b",
+   "policy": "BARIATRIC",
+   "decision": "PEND",
+   "status": "pended",
+   "reasons": [
+    "C1 not_met"
+   ],
+   "resumed_ok": true,
+   "year": 2026,
+   "statuses": {
+    "C1": "not_met",
+    "C2": "met"
+   }
+  },
+  {
+   "case": "case-092",
+   "pid": "P-6df15a1d5752",
+   "policy": "BARIATRIC",
+   "decision": "PEND",
+   "status": "pended",
+   "reasons": [
+    "C1 not_met"
+   ],
+   "resumed_ok": true,
+   "year": 2026,
+   "statuses": {
+    "C1": "not_met",
+    "C2": "met"
+   }
+  },
+  {
+   "case": "case-093",
+   "pid": "P-714503d831e8",
+   "policy": "BARIATRIC",
+   "decision": "PEND",
+   "status": "pended",
+   "reasons": [
+    "C1 not_met"
+   ],
+   "resumed_ok": true,
+   "year": 2026,
+   "statuses": {
+    "C1": "not_met",
+    "C2": "met"
+   }
+  },
+  {
+   "case": "case-094",
+   "pid": "P-71d3266d9ff9",
+   "policy": "BARIATRIC",
+   "decision": "PEND",
+   "status": "pended",
+   "reasons": [
+    "C1 not_met"
+   ],
+   "resumed_ok": true,
+   "year": 2026,
+   "statuses": {
+    "C1": "not_met",
+    "C2": "met"
+   }
+  },
+  {
+   "case": "case-095",
+   "pid": "P-75aaf394f281",
+   "policy": "BARIATRIC",
+   "decision": "PEND",
+   "status": "pended",
+   "reasons": [
+    "C1 not_met"
+   ],
+   "resumed_ok": true,
+   "year": 2026,
+   "statuses": {
+    "C1": "not_met",
+    "C2": "met"
+   }
+  },
+  {
+   "case": "case-096",
+   "pid": "P-7c5bf6f0bbde",
+   "policy": "BARIATRIC",
+   "decision": "PEND",
+   "status": "pended",
+   "reasons": [
+    "C1 not_met"
+   ],
+   "resumed_ok": true,
+   "year": 2026,
+   "statuses": {
+    "C1": "not_met",
+    "C2": "met"
+   }
+  },
+  {
+   "case": "case-097",
+   "pid": "P-8b8fa1ed99b1",
+   "policy": "BARIATRIC",
+   "decision": "PEND",
+   "status": "pended",
+   "reasons": [
+    "C1 not_met"
+   ],
+   "resumed_ok": true,
+   "year": 2026,
+   "statuses": {
+    "C1": "not_met",
+    "C2": "met"
+   }
+  },
+  {
+   "case": "case-098",
+   "pid": "P-925a3c340276",
+   "policy": "BARIATRIC",
+   "decision": "APPROVE",
+   "status": "approved",
+   "reasons": [],
+   "resumed_ok": null,
+   "year": 2026,
+   "statuses": {
+    "C1": "met",
+    "C2": "met"
+   }
+  },
+  {
+   "case": "case-099",
+   "pid": "P-92b1000649bc",
+   "policy": "BARIATRIC",
+   "decision": "PEND",
+   "status": "pended",
+   "reasons": [
+    "C1 not_met"
+   ],
+   "resumed_ok": true,
+   "year": 2026,
+   "statuses": {
+    "C1": "not_met",
+    "C2": "met"
+   }
+  },
+  {
+   "case": "case-100",
+   "pid": "P-9c946ad0e1ce",
+   "policy": "BARIATRIC",
+   "decision": "PEND",
+   "status": "pended",
+   "reasons": [
+    "C1 not_met"
+   ],
+   "resumed_ok": true,
+   "year": 2026,
+   "statuses": {
+    "C1": "not_met",
+    "C2": "met"
+   }
+  },
+  {
+   "case": "case-101",
+   "pid": "P-a29ddbfac5c5",
+   "policy": "BARIATRIC",
+   "decision": "PEND",
+   "status": "pended",
+   "reasons": [
+    "C1 not_met"
+   ],
+   "resumed_ok": true,
+   "year": 2026,
+   "statuses": {
+    "C1": "not_met",
+    "C2": "met"
+   }
+  },
+  {
+   "case": "case-102",
+   "pid": "P-a598471f9681",
+   "policy": "BARIATRIC",
+   "decision": "APPROVE",
+   "status": "approved",
+   "reasons": [],
+   "resumed_ok": null,
+   "year": 2025,
+   "statuses": {
+    "C1": "met",
+    "C2": "met"
+   }
+  },
+  {
+   "case": "case-103",
+   "pid": "P-a7853805cad4",
+   "policy": "BARIATRIC",
+   "decision": "PEND",
+   "status": "pended",
+   "reasons": [
+    "C1 not_met"
+   ],
+   "resumed_ok": true,
+   "year": 2026,
+   "statuses": {
+    "C1": "not_met",
+    "C2": "met"
+   }
+  },
+  {
+   "case": "case-104",
+   "pid": "P-a8365d9b4574",
+   "policy": "BARIATRIC",
+   "decision": "PEND",
+   "status": "pended",
+   "reasons": [
+    "C1 not_met"
+   ],
+   "resumed_ok": true,
+   "year": 2025,
+   "statuses": {
+    "C1": "not_met",
+    "C2": "met"
+   }
+  },
+  {
+   "case": "case-105",
+   "pid": "P-a8b372b29f66",
+   "policy": "BARIATRIC",
+   "decision": "PEND",
+   "status": "pended",
+   "reasons": [
+    "C1 not_met"
+   ],
+   "resumed_ok": true,
+   "year": 2026,
+   "statuses": {
+    "C1": "not_met",
+    "C2": "met"
+   }
+  },
+  {
+   "case": "case-106",
+   "pid": "P-b3f6cf98ef4d",
+   "policy": "BARIATRIC",
+   "decision": "PEND",
+   "status": "pended",
+   "reasons": [
+    "C1 not_met"
+   ],
+   "resumed_ok": true,
+   "year": 2015,
+   "statuses": {
+    "C1": "not_met",
+    "C2": "met"
+   }
+  },
+  {
+   "case": "case-107",
+   "pid": "P-b7acbc86ec12",
+   "policy": "BARIATRIC",
+   "decision": "PEND",
+   "status": "pended",
+   "reasons": [
+    "C1 not_met"
+   ],
+   "resumed_ok": true,
+   "year": 2026,
+   "statuses": {
+    "C1": "not_met",
+    "C2": "met"
+   }
+  },
+  {
+   "case": "case-108",
+   "pid": "P-bc9e7a6970dc",
+   "policy": "BARIATRIC",
+   "decision": "PEND",
+   "status": "pended",
+   "reasons": [
+    "C1 not_met"
+   ],
+   "resumed_ok": true,
+   "year": 2026,
+   "statuses": {
+    "C1": "not_met",
+    "C2": "met"
+   }
+  },
+  {
+   "case": "case-109",
+   "pid": "P-cc951feab7d3",
+   "policy": "BARIATRIC",
+   "decision": "PEND",
+   "status": "pended",
+   "reasons": [
+    "C1 not_met"
+   ],
+   "resumed_ok": true,
+   "year": 2026,
+   "statuses": {
+    "C1": "not_met",
+    "C2": "met"
+   }
+  },
+  {
+   "case": "case-110",
+   "pid": "P-d3d9a19c07c2",
+   "policy": "BARIATRIC",
+   "decision": "PEND",
+   "status": "pended",
+   "reasons": [
+    "C1 not_met"
+   ],
+   "resumed_ok": true,
+   "year": 2025,
+   "statuses": {
+    "C1": "not_met",
+    "C2": "met"
+   }
+  },
+  {
+   "case": "case-111",
+   "pid": "P-d5e88602621b",
+   "policy": "BARIATRIC",
+   "decision": "PEND",
+   "status": "pended",
+   "reasons": [
+    "C1 not_met"
+   ],
+   "resumed_ok": true,
+   "year": 2026,
+   "statuses": {
+    "C1": "not_met",
+    "C2": "met"
+   }
+  },
+  {
+   "case": "case-112",
+   "pid": "P-dce1a331521c",
+   "policy": "BARIATRIC",
+   "decision": "PEND",
+   "status": "pended",
+   "reasons": [
+    "C1 not_met"
+   ],
+   "resumed_ok": true,
+   "year": 2024,
+   "statuses": {
+    "C1": "not_met",
+    "C2": "met"
+   }
+  },
+  {
+   "case": "case-113",
+   "pid": "P-dd48c37cd673",
+   "policy": "BARIATRIC",
+   "decision": "PEND",
+   "status": "pended",
+   "reasons": [
+    "C1 not_met"
+   ],
+   "resumed_ok": true,
+   "year": 2023,
+   "statuses": {
+    "C1": "not_met",
+    "C2": "met"
+   }
+  },
+  {
+   "case": "case-114",
+   "pid": "P-ea3e6128f582",
+   "policy": "BARIATRIC",
+   "decision": "PEND",
+   "status": "pended",
+   "reasons": [
+    "C1 not_met"
+   ],
+   "resumed_ok": true,
+   "year": 2026,
+   "statuses": {
+    "C1": "not_met",
+    "C2": "met"
+   }
+  },
+  {
+   "case": "case-115",
+   "pid": "P-f2dded22b168",
+   "policy": "BARIATRIC",
+   "decision": "PEND",
+   "status": "pended",
+   "reasons": [
+    "C1 not_met"
+   ],
+   "resumed_ok": true,
+   "year": 2026,
+   "statuses": {
+    "C1": "not_met",
+    "C2": "met"
+   }
+  },
+  {
+   "case": "case-116",
+   "pid": "P-f41e0ced9443",
+   "policy": "BARIATRIC",
+   "decision": "PEND",
+   "status": "pended",
+   "reasons": [
+    "C1 not_met"
+   ],
+   "resumed_ok": true,
+   "year": 2025,
+   "statuses": {
+    "C1": "not_met",
+    "C2": "met"
+   }
+  },
+  {
+   "case": "case-117",
+   "pid": "P-ffcd8e522691",
+   "policy": "BARIATRIC",
+   "decision": "PEND",
+   "status": "pended",
+   "reasons": [
+    "C1 not_met"
+   ],
+   "resumed_ok": true,
+   "year": 2025,
+   "statuses": {
+    "C1": "not_met",
+    "C2": "met"
+   }
+  }
+ ]
+}
