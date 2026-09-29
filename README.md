@@ -137,6 +137,52 @@ intake ─▶ evaluate ─▶ write_draft ─▶ check ─┬─ REVISE (≤2) �
 Tests: `tests/test_prior_auth.py` (engine statuses, auto-approval and audit, clinician-only denial, checker
 catches for status, citation, number and denial-language errors, revision and template fallback).
 
+## Labeling workbench with active learning (September 28, 2026)
+
+Proxy labels made every result above possible, and every result above is limited by them. `labeling/` is the tool for replacing them with human labels at the lowest labeling cost.
+
+- **Active-learning queue.** A TF-IDF + logistic regression model (review text only) retrains every 25 labels and serves the review it is least sure about next. Its guess is shown as a pre-label. Until it has seen both classes, the queue alternates between the review with the most substance-use terms and a random-order review, because only about 6% of reviews are relevant.
+- **Quality control.** Hidden gold items (one task in ten) score each annotator. About 10% of items go to a second annotator, which gives Cohen's kappa. Disagreements wait in a conflict queue until someone adjudicates them. Labels faster than 2 seconds are flagged, and annotators below 80% gold accuracy are flagged.
+- **Data checks on import.** Text is HTML-unescaped and whitespace-normalized; reviews under 10 words, exact duplicates and rows without an id are rejected and counted.
+- **UI.** React + TypeScript (Vite), keyboard shortcuts (`1`, `0`, `S`), highlighted substance-use terms, and a quality view with annotator scores, agreement, conflicts, and model average precision after each retrain. Resolved labels export as JSONL.
+
+**How many labels does active learning save?** `python -m labeling.active_learning --csv ...` simulates annotators with the proxy labels: every strategy starts from the same 100 random labels, asks for 100 at a time, retrains, and is scored on the same 600-review test set as DistilBERT. Averaged over 10 seeds:
+
+| Labels | Random: average precision | Uncertainty: average precision | Random: relevant reviews found | Uncertainty: relevant reviews found |
+|---|---|---|---|---|
+| 500 | 0.718 | 0.784 | 29 | 203 |
+| 1,000 | 0.754 | 0.848 | 58 | 449 |
+| 3,000 | 0.812 | 0.910 | 172 | 1,046 |
+
+Trained on all 46,307 pool labels, the model reaches average precision 0.917. Uncertainty sampling gets to 95% of that (0.872) with **1,500 labels**; random sampling needs **11,000**, 7.3 times as many. Average precision is used because the pool is about 6% positive and the test set is 50% positive: small models put almost every test review below 0.5, so F1 at a fixed threshold would mostly measure that prior shift. The proxy labels stand in for annotators, so no human labeling time is measured. Results: `outputs/active_learning.json`.
+
+Run it:
+
+```bash
+python -m labeling.server --demo                                  # synthetic reviews, no dataset needed
+python -m labeling.server --csv /path/to/drugsComTest_raw.csv     # 3,000 real reviews + 60 gold items
+cd labeling/ui && npm install && npm run build                    # UI served at http://127.0.0.1:8765
+```
+
+Tests: `tests/test_labeling_workbench.py` (queue order, gold scoring, agreement, adjudication, export, API), `labeling/ui/src/logic.test.ts` (Vitest), and `labeling/ui/e2e/workbench.spec.ts`, a Playwright flow run on Chromium, Firefox and WebKit, each against its own demo server. Two annotators label with the keyboard and mouse, disagree, and a reviewer resolves the conflict; a second test checks a 375-pixel-wide phone layout. CI runs all three browsers.
+
+### Counterfactual bias test (September 28, 2026)
+
+Whether a review is about substance use should not depend on who wrote it. `python -m analysis.bert_bias` rewrites each of the 600 test reviews two ways and measures how often the text-only DistilBERT changes its answer: with gender words swapped, and with an identity statement in front ("As a Black woman, ..."). Neutral prefixes ("As a person, ...") are the control. A prefix pushes the end of long reviews past the 128-token limit (266 of the 600 are longer), and the control measures that effect alone. The pass criterion, fixed before running, is at most 2% of predictions flipping for every perturbation.
+
+| Perturbation | Original model | After counterfactual augmentation |
+|---|---|---|
+| Gender words swapped | 1.0% | 0.0% |
+| Neutral prefix (control: person / patient) | 2.8% / 2.2% | 1.7% / 2.3% |
+| Worst identity statement | 9.0% ("gay man") | 3.0% ("person on disability") |
+| "Gay man" | 9.0% | 2.2% |
+| Identities above the control's flip rate by more than 1 point | 8 of 12 | 0 of 12 |
+| F1 on the 600 test reviews | 0.873 | 0.871 |
+
+The original model failed: identity statements flipped 2.5–9.0% of predictions, mostly toward "not relevant" (196 of 318 flips; 51 of 54 for "gay man"). The fix is counterfactual data augmentation: `python -m analysis.bert_classifier --text-only --augment-identity` rewrites half the training reviews with an identity statement and, half of those times, swapped gender words, leaving the labels unchanged. The training identities are a different list from the tested ones, so the test measures generalization, not memorized phrases. After retraining, every tested identity is within 0.7 points of the neutral control and F1 is unchanged. **The model still fails the 2% criterion**: four identities flip 2.2–3.0%, about the same as truncation alone. Handling long reviews (a longer context, or head-and-tail truncation) is the next fix. The gender swap is word-level and approximate ("her" always becomes "his"). The reviews carry no demographic fields, so this measures sensitivity to identity words, not outcome parity between real groups.
+
+Results: `outputs/bert_bias.json` (original) and `outputs/bert_bias_cda.json` (augmented), with the augmented model's accuracy in `outputs/bert_eval_textonly_cda.json` (W&B run `54liflfc`). Tests: `tests/test_bert_bias.py`.
+
 ## Architecture
 
 ```

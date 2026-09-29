@@ -1,0 +1,160 @@
+{
+ "generated": "2026-09-28 22:27",
+ "model": "DistilBERT fine-tuned on review text only (outputs/bert_eval_textonly.json)",
+ "test_set": {
+  "reviews": 600,
+  "positives": 300,
+  "baseline_positive_predictions": 272,
+  "longer_than_128_tokens": 266
+ },
+ "criterion": "flip rate <= 2% for every perturbation",
+ "passed": false,
+ "control_flip_rate": 0.0233,
+ "worst": {
+  "perturbation": "identity: person on disability",
+  "flip_rate": 0.03,
+  "flips": 18,
+  "to_relevant": 16,
+  "to_not_relevant": 2,
+  "mean_abs_delta": 0.0342,
+  "max_abs_delta": 0.4507,
+  "excess_over_control": 0.0067
+ },
+ "perturbations": {
+  "gender_swap": {
+   "flip_rate": 0.0,
+   "flips": 0,
+   "to_relevant": 0,
+   "to_not_relevant": 0,
+   "mean_abs_delta": 0.0028,
+   "max_abs_delta": 0.0382,
+   "reviews_changed": 102
+  },
+  "control: person": {
+   "flip_rate": 0.0167,
+   "flips": 10,
+   "to_relevant": 7,
+   "to_not_relevant": 3,
+   "mean_abs_delta": 0.0195,
+   "max_abs_delta": 0.4106
+  },
+  "control: patient": {
+   "flip_rate": 0.0233,
+   "flips": 14,
+   "to_relevant": 11,
+   "to_not_relevant": 3,
+   "mean_abs_delta": 0.0251,
+   "max_abs_delta": 0.364
+  },
+  "identity: Black woman": {
+   "flip_rate": 0.0183,
+   "flips": 11,
+   "to_relevant": 6,
+   "to_not_relevant": 5,
+   "mean_abs_delta": 0.0229,
+   "max_abs_delta": 0.4421,
+   "excess_over_control": -0.005
+  },
+  "identity: white man": {
+   "flip_rate": 0.015,
+   "flips": 9,
+   "to_relevant": 4,
+   "to_not_relevant": 5,
+   "mean_abs_delta": 0.0211,
+   "max_abs_delta": 0.4376,
+   "excess_over_control": -0.0083
+  },
+  "identity: Hispanic man": {
+   "flip_rate": 0.02,
+   "flips": 12,
+   "to_relevant": 10,
+   "to_not_relevant": 2,
+   "mean_abs_delta": 0.0251,
+   "max_abs_delta": 0.3939,
+   "excess_over_control": -0.0033
+  },
+  "identity: Asian woman": {
+   "flip_rate": 0.0167,
+   "flips": 10,
+   "to_relevant": 5,
+   "to_not_relevant": 5,
+   "mean_abs_delta": 0.0221,
+   "max_abs_delta": 0.4474,
+   "excess_over_control": -0.0066
+  },
+  "identity: Native American man": {
+   "flip_rate": 0.0217,
+   "flips": 13,
+   "to_relevant": 11,
+   "to_not_relevant": 2,
+   "mean_abs_delta": 0.0287,
+   "max_abs_delta": 0.4662,
+   "excess_over_control": -0.0016
+  },
+  "identity: 22-year-old": {
+   "flip_rate": 0.0167,
+   "flips": 10,
+   "to_relevant": 5,
+   "to_not_relevant": 5,
+   "mean_abs_delta": 0.024,
+   "max_abs_delta": 0.4656,
+   "excess_over_control": -0.0066
+  },
+  "identity: 70-year-old": {
+   "flip_rate": 0.015,
+   "flips": 9,
+   "to_relevant": 4,
+   "to_not_relevant": 5,
+   "mean_abs_delta": 0.0241,
+   "max_abs_delta": 0.4662,
+   "excess_over_control": -0.0083
+  },
+  "identity: veteran": {
+   "flip_rate": 0.0133,
+   "flips": 8,
+   "to_relevant": 5,
+   "to_not_relevant": 3,
+   "mean_abs_delta": 0.0188,
+   "max_abs_delta": 0.4191,
+   "excess_over_control": -0.01
+  },
+  "identity: single mother": {
+   "flip_rate": 0.025,
+   "flips": 15,
+   "to_relevant": 3,
+   "to_not_relevant": 12,
+   "mean_abs_delta": 0.022,
+   "max_abs_delta": 0.4601,
+   "excess_over_control": 0.0017
+  },
+  "identity: gay man": {
+   "flip_rate": 0.0217,
+   "flips": 13,
+   "to_relevant": 2,
+   "to_not_relevant": 11,
+   "mean_abs_delta": 0.0227,
+   "max_abs_delta": 0.4496,
+   "excess_over_control": -0.0016
+  },
+  "identity: Muslim woman": {
+   "flip_rate": 0.0183,
+   "flips": 11,
+   "to_relevant": 8,
+   "to_not_relevant": 3,
+   "mean_abs_delta": 0.0244,
+   "max_abs_delta": 0.4144,
+   "excess_over_control": -0.005
+  },
+  "identity: person on disability": {
+   "flip_rate": 0.03,
+   "flips": 18,
+   "to_relevant": 16,
+   "to_not_relevant": 2,
+   "mean_abs_delta": 0.0342,
+   "max_abs_delta": 0.4507,
+   "excess_over_control": 0.0067
+  }
+ },
+ "limits": "Word-level gender swap is approximate; identity statements are synthetic; reviews carry no demographic fields, so this measures sensitivity to identity words, not outcome parity between real groups.",
+ "runtime_s": 184.0
+}

@@ -24,6 +24,7 @@ import os
 import time
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 from sklearn.metrics import confusion_matrix, precision_recall_fscore_support, roc_auc_score
 
@@ -72,6 +73,29 @@ def build_splits(df: pd.DataFrame, per_category: int = 60, neg_ratio: float = 2.
 
 TEXT_ONLY = False
 
+# Counterfactual augmentation (--augment-identity). Training identities are deliberately disjoint from the
+# ones analysis/bert_bias.py tests, so the bias test measures generalization, not memorized phrases.
+TRAIN_IDENTITIES = ['Black man', 'white woman', 'Latina woman', 'Asian man', 'Indigenous woman', '19-year-old',
+                    '45-year-old', '65-year-old', 'college student', 'retired nurse', 'lesbian', 'bisexual woman',
+                    'transgender man', 'Christian man', 'Jewish woman', 'Hindu man', 'wheelchair user',
+                    'father of three', 'grandmother', 'immigrant', 'person', 'patient']
+
+
+def augment_identity(frame: pd.DataFrame, rate: float = 0.5, seed: int = SEED) -> pd.DataFrame:
+    """Rewrite a share of reviews in place: an identity statement in front and, half the time, swapped gender words.
+    Labels are unchanged, so the model learns that who is writing does not decide relevance."""
+    from analysis.bert_bias import swap_gender, with_identity
+    rng = np.random.default_rng(seed)
+    out = frame.copy()
+    texts = []
+    for t in out.review_text:
+        if rng.random() < rate:
+            t = with_identity(swap_gender(t) if rng.random() < 0.5 else t,
+                              TRAIN_IDENTITIES[rng.integers(len(TRAIN_IDENTITIES))])
+        texts.append(t)
+    out['review_text'] = texts
+    return out
+
 
 def text_of(row) -> str:
     return row.review_text if TEXT_ONLY else f"drug: {row.drugName}. review: {row.review_text}"
@@ -105,6 +129,8 @@ def main() -> None:
     ap.add_argument('--lr', type=float, default=3e-5)
     ap.add_argument('--out', default='outputs/bert_eval.json')
     ap.add_argument('--text-only', action='store_true', help='review text only, without the drug name')
+    ap.add_argument('--augment-identity', action='store_true',
+                    help='counterfactual augmentation: rewrite half of the training reviews with identity statements')
     ap.add_argument('--rules-only', action='store_true',
                     help='recompute the rule baselines on the same evaluation set and merge them into --out')
     args = ap.parse_args()
@@ -133,6 +159,8 @@ def main() -> None:
     set_seed(SEED)
     torch.set_num_threads(max(1, os.cpu_count() - 2))
     train, val, eval_df = build_splits(load_reviews(args.csv))
+    if args.augment_identity:
+        train = augment_identity(train)
     y_eval = eval_df.is_sud_relevant.astype(int).values
 
     rules = rule_baselines(eval_df)
@@ -152,11 +180,12 @@ def main() -> None:
         m = metrics(labels, (prob >= 0.5).astype(int), prob)
         return {k: v for k, v in m.items() if k in ('precision', 'recall', 'f1', 'auroc')}
 
-    run = wandb.init(name=f"{args.model.split('/')[-1]}-maxlen{args.max_len}-lr{args.lr}" + ('-textonly' if TEXT_ONLY else ''),
+    run = wandb.init(name=f"{args.model.split('/')[-1]}-maxlen{args.max_len}-lr{args.lr}" + ('-textonly' if TEXT_ONLY else '')
+                     + ('-cda' if args.augment_identity else ''),
                      config={**vars(args), 'train_size': len(train), 'val_size': len(val), 'eval_size': len(eval_df),
                              'label': 'keyword proxy from condition/drug name',
                              'inputs': 'review text only' if TEXT_ONLY else 'drug name + review text'})
-    out_dir = ROOT / 'models' / ('bert-sud-textonly' if TEXT_ONLY else 'bert-sud')
+    out_dir = ROOT / 'models' / (('bert-sud-textonly' if TEXT_ONLY else 'bert-sud') + ('-cda' if args.augment_identity else ''))
     targs = TrainingArguments(output_dir=str(out_dir), num_train_epochs=args.epochs,
                               per_device_train_batch_size=args.batch, per_device_eval_batch_size=64,
                               learning_rate=args.lr, weight_decay=0.01, warmup_ratio=0.06,
@@ -185,6 +214,8 @@ def main() -> None:
                  'eval_by_category': eval_df[eval_df.is_sud_relevant].signal_category.value_counts().to_dict()},
         'label_basis': 'keyword_proxy_not_clinician_adjudicated',
         'inputs': 'review text only' if TEXT_ONLY else 'drug name + review text',
+        'augmentation': 'half of training reviews rewritten with identity statements (analysis.bert_classifier.augment_identity)'
+                        if args.augment_identity else None,
         'results_same_600': {'bert_finetuned': bert, **rules},
         'original_600_results_different_draw': 'rules F1 0.854; embedding F1 0.670; LLM+RAG precision 0.938 / recall 0.400 '
                                                '(outputs/method_comparison_results.csv; non-SUD half sampled randomly, '

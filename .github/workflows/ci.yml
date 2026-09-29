@@ -33,11 +33,45 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           # Install test subset only (no GPU, no DB required)
-          pip install numpy scipy scikit-learn pandas pytest requests langgraph==0.2.76
+          pip install numpy scipy scikit-learn pandas pytest requests langgraph==0.2.76 fastapi httpx uvicorn
 
       - name: Run unit tests
         run: |
           pytest tests/ -v --tb=short
+
+  labeling-ui:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: labeling/ui
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install workbench server dependencies
+        run: pip install numpy scipy scikit-learn pandas fastapi uvicorn
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: labeling/ui/package-lock.json
+
+      - name: Build and unit-test the UI
+        run: |
+          npm ci
+          npm run build
+          npm test
+
+      - name: Cross-browser end-to-end tests (Chromium, Firefox, WebKit)
+        run: |
+          npx playwright install --with-deps chromium firefox webkit
+          PYTHON=python npx playwright test
 
   lint:
     runs-on: ubuntu-latest
