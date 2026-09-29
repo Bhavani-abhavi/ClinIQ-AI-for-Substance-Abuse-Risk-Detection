@@ -31,7 +31,8 @@ mark { background: var(--mark); color: inherit; padding: 0 .1em; border-radius: 
 .tile { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: .8rem; display: grid; }
 .tile strong { font-size: 1.5rem; }
 .tile span { color: var(--muted); font-size: .85rem; }
-table { width: 100%; border-collapse: collapse; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; font-size: .92rem; display: block; overflow-x: auto; }
+.table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); }
+table { width: 100%; border-collapse: collapse; font-size: .92rem; }
 th, td { text-align: left; padding: .5rem .7rem; border-bottom: 1px solid var(--line); white-space: nowrap; }
 .conflict { margin-bottom: .6rem; }
 a { color: var(--accent); }

@@ -33,6 +33,17 @@ flowchart LR
 A label reaches the export only when it's resolved: adjudicated, or unanimous among the people who labeled
 it. Gold items never train the model and never leave in the export.
 
+## Walkthrough (synthetic demo reviews)
+
+Captured by `labeling/ui/storyboard.mjs` on the built-in demo data. The labels are scripted, which is why the
+quality view flags both annotators as too fast: that check is working as intended.
+
+| 1. Cold start: no model yet | 2. Model suggestion once it has trained |
+|---|---|
+| ![Cold start](images/labeling-1-queue-cold-start.png) | ![Suggestion](images/labeling-2-model-suggestion.png) |
+| **3. Quality view: gold accuracy, agreement, a conflict** | **4. Adjudicated; resolved labels export as JSONL** |
+| ![Quality and conflict](images/labeling-3-quality-and-conflict.png) | ![Adjudicated](images/labeling-4-adjudicated-and-export.png) |
+
 ## Components
 
 | Piece | File | Role |

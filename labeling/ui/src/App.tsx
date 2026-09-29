@@ -245,7 +245,7 @@ function QualityView({ reviewer }: { reviewer: string }) {
       </div>
 
       <h2>Annotators</h2>
-      <table>
+      <div className="table-wrap"><table>
         <thead><tr><th>Annotator</th><th>Labels</th><th>Gold accuracy</th><th>Median sec</th><th>Flags</th></tr></thead>
         <tbody>
           {stats.annotators.map((a) => (
@@ -258,7 +258,7 @@ function QualityView({ reviewer }: { reviewer: string }) {
             </tr>
           ))}
         </tbody>
-      </table>
+      </table></div>
 
       <h2>Conflicts</h2>
       {conflicts.length === 0 ? <p data-testid="no-conflicts">No open conflicts.</p> : conflicts.map((c) => (
@@ -273,14 +273,14 @@ function QualityView({ reviewer }: { reviewer: string }) {
       ))}
 
       <h2>Model after each retrain</h2>
-      <table>
+      <div className="table-wrap"><table>
         <thead><tr><th>Labels</th><th>Positives</th><th>Test AP</th></tr></thead>
         <tbody>
           {stats.model_runs.map((r, i) => (
             <tr key={i}><td>{r.labels}</td><td>{r.positives}</td><td>{r.test_ap ?? '—'}</td></tr>
           ))}
         </tbody>
-      </table>
+      </table></div>
       <p><a href="/api/export" download="labels.jsonl">Export resolved labels (JSONL)</a></p>
     </section>
   );
