@@ -33,7 +33,9 @@ guards it.
 - **Fix:** key repeat is ignored, and no label or save counts in the first 300 ms after an item appears. The
   box tool's `Enter` got the same guard. The pilot report excludes labels under 0.3 s and lists them.
 - **Check:** Playwright tests for a double press and for a held key (synthetic repeat events), on three
-  browsers.
+  browsers. The first version of the guard read React state, and CI caught WebKit still labeling twice: the
+  second press arrived before the re-render that marked the save busy. A synchronous lock (a ref set when a label
+  starts, cleared once the next item is shown) fixed it; the suite then passed twice on all three browsers.
 
 ## 3. Unlocked database reads corrupted results under load
 

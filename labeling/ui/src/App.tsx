@@ -80,6 +80,9 @@ function LabelView({ annotator, pilot }: { annotator: string; pilot: boolean }) 
   const [notice, setNotice] = useState('');
   const [save, setSave] = useState<SaveState>({ kind: 'idle' });
   const shownAt = useRef(performance.now());
+  // Set synchronously when a label starts, cleared once the next item is on screen. React state alone is not
+  // enough: a second key press can arrive before the re-render that marks the save as busy.
+  const acting = useRef(false);
   const busy = save.kind === 'saving' || save.kind === 'retrying';
 
   const load = useCallback(async () => {
@@ -140,12 +143,17 @@ function LabelView({ annotator, pilot }: { annotator: string; pilot: boolean }) 
   }, [deliver, load]);
 
   const act = useCallback(async (action: Action) => {
-    if (!task || busy || save.kind === 'failed') return;   // resolve the unsaved label first
+    if (acting.current || !task || busy || save.kind === 'failed') return;   // resolve the unsaved label first
     if (performance.now() - shownAt.current < MIN_DWELL_MS) return;
-    const p: Pending = { item_id: task.item_id, label: actionToLabel(action),
-                         seconds: Math.round((performance.now() - shownAt.current) / 100) / 10 };
-    writeOutbox(annotator, enqueue(readOutbox(annotator), p));   // survives a reload before the server answers
-    await submit(p);
+    acting.current = true;
+    try {
+      const p: Pending = { item_id: task.item_id, label: actionToLabel(action),
+                           seconds: Math.round((performance.now() - shownAt.current) / 100) / 10 };
+      writeOutbox(annotator, enqueue(readOutbox(annotator), p));   // survives a reload before the server answers
+      await submit(p);
+    } finally {
+      acting.current = false;
+    }
   }, [annotator, busy, save.kind, submit, task]);
 
   const retry = useCallback(async () => {
