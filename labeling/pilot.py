@@ -193,7 +193,12 @@ def setup_from_csv(csv: str, db: str, n_items: int = 60, train_size: int = 5000,
     pos = pool[pool.is_sud_relevant].sample(n_items // 2, random_state=seed)
     neg = pool[~pool.is_sud_relevant].sample(n_items - n_items // 2, random_state=seed)
     pilot = pd.concat([pos, neg]).sample(frac=1, random_state=seed)
-    rest = pool[~pool.review_text.isin(set(pilot.review_text))].sample(train_size, random_state=seed)
+    rest = pool[~pool.review_text.isin(set(pilot.review_text))]
+    # Balanced training set: the pilot is 50% relevant, and a model trained on the pool's ~6% would
+    # under-predict "relevant" there (the same prior shift as in active_learning.py).
+    half = min(train_size // 2, int(rest.is_sud_relevant.sum()))
+    rest = pd.concat([rest[rest.is_sud_relevant].sample(half, random_state=seed),
+                      rest[~rest.is_sud_relevant].sample(half, random_state=seed)])
     vec = make_vectorizer().fit(rest.review_text)
     model = fit_model(vec.transform(rest.review_text), rest.is_sud_relevant.astype(int).values)
     prob = positive_proba(model, vec.transform(pilot.review_text))
@@ -203,7 +208,7 @@ def setup_from_csv(csv: str, db: str, n_items: int = 60, train_size: int = 5000,
              for u, t, d, y, p in zip(pilot.uniqueID, pilot.review_text, pilot.drugName, pilot.is_sud_relevant, prob)]
     suggestion_acc = float(np.mean([it['suggestion'] == it['proxy'] for it in items]))
     meta = {'items': len(items), 'positive_share': 0.5, 'suggestion_model': 'TF-IDF + logistic regression',
-            'suggestion_training_reviews': train_size, 'suggestion_accuracy_vs_proxy_on_pilot_items': round(suggestion_acc, 3),
+            'suggestion_training_reviews': int(len(rest)), 'suggestion_training_balance': '50/50, disjoint from pilot items', 'suggestion_accuracy_vs_proxy_on_pilot_items': round(suggestion_acc, 3),
             'seed': seed, 'max_words': 120}
     PilotStudy(db).load(items, meta)
     return meta
