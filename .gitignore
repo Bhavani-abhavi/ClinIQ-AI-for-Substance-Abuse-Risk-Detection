@@ -26,3 +26,6 @@ data/synthea/
 # Fine-tuned model weights and local W&B run files
 models/bert-sud*/
 outputs/wandb/
+
+# Pilot databases (annotator labels and timings stay local; the report JSON is what gets shared)
+outputs/pilot/

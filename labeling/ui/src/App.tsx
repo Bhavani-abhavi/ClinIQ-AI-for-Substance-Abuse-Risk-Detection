@@ -17,6 +17,11 @@ export function App() {
   const [name, setName] = useState(readName);
   const [draft, setDraft] = useState(name);
   const [tab, setTab] = useState<'label' | 'quality'>('label');
+  const [pilot, setPilot] = useState(false);
+
+  useEffect(() => {
+    api.mode().then((m) => setPilot(m?.mode === 'pilot')).catch(() => setPilot(false));
+  }, []);
 
   const start = (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,24 +51,26 @@ export function App() {
   return (
     <main className="shell">
       <header className="top">
-        <h1>ClinIQ labeling workbench</h1>
-        <nav aria-label="Views">
-          <button aria-pressed={tab === 'label'} onClick={() => setTab('label')}>Label</button>
-          <button aria-pressed={tab === 'quality'} onClick={() => setTab('quality')}>Quality</button>
-        </nav>
+        <h1>{pilot ? 'ClinIQ labeling pilot' : 'ClinIQ labeling workbench'}</h1>
+        {!pilot && (
+          <nav aria-label="Views">
+            <button aria-pressed={tab === 'label'} onClick={() => setTab('label')}>Label</button>
+            <button aria-pressed={tab === 'quality'} onClick={() => setTab('quality')}>Quality</button>
+          </nav>
+        )}
         <span className="who">
           Annotator: <strong data-testid="annotator">{name}</strong>{' '}
           <button className="link" onClick={() => { setName(''); setDraft(''); }}>switch</button>
         </span>
       </header>
-      {tab === 'label' ? <LabelView annotator={name} /> : <QualityView reviewer={name} />}
+      {tab === 'label' || pilot ? <LabelView annotator={name} pilot={pilot} /> : <QualityView reviewer={name} />}
     </main>
   );
 }
 
 type SaveState = { kind: 'idle' } | { kind: 'saving' } | { kind: 'retrying'; attempt: number } | { kind: 'failed'; message: string };
 
-function LabelView({ annotator }: { annotator: string }) {
+function LabelView({ annotator, pilot }: { annotator: string; pilot: boolean }) {
   const [task, setTask] = useState<Task | null | undefined>(undefined);
   const [count, setCount] = useState(0);
   const [error, setError] = useState('');
@@ -147,6 +154,7 @@ function LabelView({ annotator }: { annotator: string }) {
     const onKey = (e: KeyboardEvent) => {
       const t = e.target as HTMLElement;
       const action = keyToAction(e.key, t.tagName === 'INPUT' || t.tagName === 'TEXTAREA');
+      if (action === 'skip' && pilot) return;                 // every pilot item needs an answer
       if (action) {
         e.preventDefault();
         void act(action);
@@ -154,13 +162,14 @@ function LabelView({ annotator }: { annotator: string }) {
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [act]);
+  }, [act, pilot]);
 
   if (task === undefined) return <p aria-live="polite">Loading…</p>;
   return (
     <section className="card" aria-labelledby="task-heading">
       <p className="meta">
         <span data-testid="session-count">Labeled this session: {count}</span>
+        {task?.progress && <span data-testid="pilot-progress">Item {task.progress.done + 1} of {task.progress.total}</span>}
         <span data-testid="save-state" aria-live="polite">
           {save.kind === 'saving' && 'Saving…'}
           {save.kind === 'retrying' && `Connection problem, retrying (${save.attempt})…`}
@@ -183,13 +192,15 @@ function LabelView({ annotator }: { annotator: string }) {
           <blockquote data-testid="review" data-item={task.item_id}>
             {segments(task.text, task.highlights).map((s, i) => (s.mark ? <mark key={i}>{s.text}</mark> : <span key={i}>{s.text}</span>))}
           </blockquote>
-          <p className="suggestion" data-testid="suggestion">{describeSuggestion(task.suggestion)}</p>
+          <p className="suggestion" data-testid="suggestion">
+            {task.condition === 'manual' ? 'Label this one on your own: no model suggestion for this item.' : describeSuggestion(task.suggestion)}
+          </p>
           <div className="actions">
             <button onClick={() => act('relevant')} disabled={busy || save.kind === 'failed'}>SUD-relevant <kbd>1</kbd></button>
             <button onClick={() => act('not_relevant')} disabled={busy || save.kind === 'failed'}>Not relevant <kbd>0</kbd></button>
-            <button className="secondary" onClick={() => act('skip')} disabled={busy || save.kind === 'failed'}>Skip <kbd>S</kbd></button>
+            {!pilot && <button className="secondary" onClick={() => act('skip')} disabled={busy || save.kind === 'failed'}>Skip <kbd>S</kbd></button>}
           </div>
-          <p className="hint">Highlights mark substance-use words to help reading; they are not the answer.</p>
+          {task.condition !== 'manual' && <p className="hint">Highlights mark substance-use words to help reading; they are not the answer.</p>}
         </>
       )}
     </section>

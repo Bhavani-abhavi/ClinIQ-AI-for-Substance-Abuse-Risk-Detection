@@ -188,6 +188,17 @@ Tests: `tests/test_labeling_workbench.py` (queue order, gold scoring, agreement,
 
   Results: `outputs/labeling_benchmark.json`.
 
+**Human pilot (assisted vs. manual).** `labeling/pilot.py` measures whether suggestions help real annotators.
+- **Setup:** a fixed set of 60 reviews, half relevant by the proxy label. Suggestions come from a model trained
+  on other reviews.
+- **Conditions:** they alternate item by item. The first annotator starts assisted and the second manual, so
+  practice effects cancel and every item is seen both ways. The server assigns the condition.
+- **Report:** time per item, agreement with the proxy label and between annotators, and how often an annotator
+  followed a suggestion that was wrong.
+- **Status:** no results yet; they appear here only after people have labeled.
+- **Design notes:** `docs/labeling-architecture.md` covers the queue, quality checks, adjudication and export;
+  `docs/ai-assisted-engineering.md` covers how changes were checked.
+
 ### Counterfactual bias test (September 28, 2026)
 
 Whether a review is about substance use should not depend on who wrote it. `python -m analysis.bert_bias` rewrites each of the 600 test reviews two ways and measures how often the text-only DistilBERT changes its answer: with gender words swapped, and with an identity statement in front ("As a Black woman, ..."). Neutral prefixes ("As a person, ...") are the control. A prefix pushes the end of long reviews past the 128-token limit (266 of the 600 are longer), and the control measures that effect alone. The pass criterion, fixed before running, is at most 2% of predictions flipping for every perturbation.

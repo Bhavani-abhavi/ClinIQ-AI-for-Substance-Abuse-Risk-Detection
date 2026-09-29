@@ -6,6 +6,8 @@ export interface Task {
   drug: string | null;
   suggestion: { label: number; confidence: number } | null;
   highlights: number[][];
+  condition?: 'assisted' | 'manual';
+  progress?: { done: number; total: number };
 }
 
 export interface AnnotatorStats {
@@ -47,6 +49,7 @@ async function send<T>(path: string, init?: RequestInit): Promise<T | null> {
 }
 
 export const api = {
+  mode: () => send<{ mode: 'pilot' | 'workbench' }>('/api/mode'),
   task: (annotator: string) => send<Task>(`/api/task?annotator=${encodeURIComponent(annotator)}`),
   label: (annotator: string, item_id: string, label: 0 | 1 | 'skip', seconds: number) =>
     send<{ saved?: boolean; duplicate?: boolean }>('/api/labels', { method: 'POST', body: JSON.stringify({ annotator, item_id, label, seconds }) }),

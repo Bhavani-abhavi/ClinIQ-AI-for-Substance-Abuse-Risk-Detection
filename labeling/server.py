@@ -54,6 +54,10 @@ def create_app(bench: Workbench) -> FastAPI:
     def health():
         return {'ok': True}
 
+    @app.get('/api/mode')
+    def mode():
+        return {'mode': 'workbench'}
+
     @app.get('/api/task')
     def task(annotator: str):
         t = guard(bench.next_task, annotator)
@@ -79,6 +83,50 @@ def create_app(bench: Workbench) -> FastAPI:
     @app.get('/api/export')
     def export():
         return PlainTextResponse(bench.export_jsonl(), media_type='application/x-ndjson')
+
+    if UI_DIST.exists():
+        app.mount('/assets', StaticFiles(directory=UI_DIST / 'assets'), name='assets')
+
+        @app.get('/')
+        def index():
+            return FileResponse(UI_DIST / 'index.html')
+
+    return app
+
+
+def create_pilot_app(study) -> FastAPI:
+    """The assisted-vs-manual pilot behind the same UI: tasks carry a server-chosen condition."""
+    app = FastAPI(title='ClinIQ labeling pilot')
+
+    def guard(fn, *args, **kwargs):
+        try:
+            return fn(*args, **kwargs)
+        except ValidationError as e:
+            raise HTTPException(status_code=422, detail=str(e)) from e
+        except ConflictError as e:
+            raise HTTPException(status_code=409, detail={'message': str(e), 'current': e.current}) from e
+
+    @app.get('/api/health')
+    def health():
+        return {'ok': True}
+
+    @app.get('/api/mode')
+    def mode():
+        return {'mode': 'pilot'}
+
+    @app.get('/api/task')
+    def task(annotator: str):
+        t = guard(study.next_task, annotator)
+        return t if t is not None else Response(status_code=204)
+
+    @app.post('/api/labels')
+    def label(body: LabelIn):
+        value = int(body.label) if str(body.label).isdigit() else body.label
+        return guard(study.submit, body.annotator, body.item_id, value, body.seconds)
+
+    @app.get('/api/pilot/report')
+    def report():
+        return study.report()
 
     if UI_DIST.exists():
         app.mount('/assets', StaticFiles(directory=UI_DIST / 'assets'), name='assets')

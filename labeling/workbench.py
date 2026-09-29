@@ -56,6 +56,17 @@ CREATE TABLE IF NOT EXISTS model_runs (id INTEGER PRIMARY KEY AUTOINCREMENT, lab
 """
 
 
+def _locked(method):
+    """Every read and write shares one SQLite connection across server threads; hold the lock for all of them."""
+    import functools
+
+    @functools.wraps(method)
+    def wrapper(self, *args, **kwargs):
+        with self.lock:
+            return method(self, *args, **kwargs)
+    return wrapper
+
+
 class ValidationError(ValueError):
     pass
 
@@ -103,6 +114,7 @@ class Workbench:
         self._since_retrain = 0
 
     # ── import ────────────────────────────────────────────────────────────
+    @_locked
     def import_items(self, rows, gold_ids=()) -> dict:
         """Validate and load items. rows: dicts with id, text, optional drug and label (used only for gold)."""
         gold_ids = set(gold_ids)
@@ -150,6 +162,7 @@ class Workbench:
         self._terms = np.array([len(highlight_spans(r[1])) for r in rows])
 
     # ── labels and resolution ─────────────────────────────────────────────
+    @_locked
     def _labels_by_item(self) -> dict[str, list[tuple[str, int]]]:
         out = defaultdict(list)
         for item_id, annotator, label in self.db.execute(
@@ -157,6 +170,7 @@ class Workbench:
             out[item_id].append((annotator, label))
         return out
 
+    @_locked
     def resolved(self, include_gold: bool = False) -> dict[str, int]:
         """item -> final label: adjudicated, else unanimous. Conflicts stay out until adjudicated."""
         adj = dict(self.db.execute('SELECT item_id, label FROM adjudications'))
@@ -173,6 +187,7 @@ class Workbench:
             out.setdefault(item_id, label)
         return out
 
+    @_locked
     def conflicts(self) -> list[dict]:
         adj = {i for (i,) in self.db.execute('SELECT item_id FROM adjudications')}
         texts = dict(self.db.execute('SELECT id, text FROM items'))
@@ -303,6 +318,7 @@ class Workbench:
             return out
 
     # ── quality ───────────────────────────────────────────────────────────
+    @_locked
     def stats(self) -> dict:
         gold = dict(self.db.execute('SELECT id, gold FROM items WHERE gold IS NOT NULL'))
         per = defaultdict(lambda: {'labels': 0, 'gold_seen': 0, 'gold_correct': 0, 'seconds': [], 'fast': 0})
@@ -341,6 +357,7 @@ class Workbench:
                 'annotators': annotators, 'agreement': {'double_labeled': len(pairs), 'cohen_kappa': kappa},
                 'conflicts': len(self.conflicts()), 'model_runs': runs}
 
+    @_locked
     def export(self) -> list[dict]:
         texts = dict(self.db.execute('SELECT id, text FROM items'))
         adj = {i for (i,) in self.db.execute('SELECT item_id FROM adjudications')}
@@ -348,5 +365,6 @@ class Workbench:
         return [{'id': i, 'text': texts[i], 'label': v, 'label_name': LABELS[v], 'annotations': len(votes.get(i, [])),
                  'adjudicated': i in adj} for i, v in sorted(self.resolved().items())]
 
+    @_locked
     def export_jsonl(self) -> str:
         return ''.join(json.dumps(r) + '\n' for r in self.export())

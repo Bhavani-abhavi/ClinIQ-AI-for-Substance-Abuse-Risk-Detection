@@ -183,3 +183,40 @@ def test_http_api_round_trip(data):
     lines = client.get('/api/export').text.splitlines()
     assert json.loads(lines[0])['adjudicated'] is True
     assert client.get('/api/stats').json()['conflicts'] == 0
+
+
+def test_concurrent_requests_share_one_connection_safely(data):
+    """The server answers requests on several threads; stats and conflicts used to read the shared SQLite
+    connection unlocked while saves were writing, which could corrupt results under load."""
+    import threading
+
+    rows, gold, truth = data
+    b = bench(rows, gold, gold_every=1000, retrain_every=5, overlap_rate=0.5)
+    errors, saved = [], []
+
+    def annotator(name):
+        try:
+            for _ in range(8):
+                t = b.next_task(name)
+                if t is None:
+                    return
+                b.submit(name, t['item_id'], truth[t['item_id']], 1.0)
+                saved.append(name)
+        except Exception as e:                      # noqa: BLE001 - any error fails the test below
+            errors.append(repr(e))
+
+    def reader():
+        try:
+            for _ in range(40):
+                b.stats(); b.conflicts(); b.export_jsonl()
+        except Exception as e:                      # noqa: BLE001
+            errors.append(repr(e))
+
+    threads = [threading.Thread(target=annotator, args=(f'a{i}',)) for i in range(4)] + \
+              [threading.Thread(target=reader) for _ in range(4)]
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join()
+    assert errors == []
+    assert sum(a['labels'] for a in b.stats()['annotators']) == len(saved)
