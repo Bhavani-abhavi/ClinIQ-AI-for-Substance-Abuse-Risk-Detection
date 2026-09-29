@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { api, type Conflict, type Stats, type Task } from './api';
+import { HttpError, type Pending, dequeue, enqueue, readOutbox, withRetry, writeOutbox } from './outbox';
 import { type Action, actionToLabel, describeSuggestion, formatAccuracy, keyToAction, segments } from './logic';
 
 const NAME_KEY = 'cliniq-annotator';
@@ -60,12 +61,16 @@ export function App() {
   );
 }
 
+type SaveState = { kind: 'idle' } | { kind: 'saving' } | { kind: 'retrying'; attempt: number } | { kind: 'failed'; message: string };
+
 function LabelView({ annotator }: { annotator: string }) {
   const [task, setTask] = useState<Task | null | undefined>(undefined);
   const [count, setCount] = useState(0);
   const [error, setError] = useState('');
-  const [busy, setBusy] = useState(false);
+  const [notice, setNotice] = useState('');
+  const [save, setSave] = useState<SaveState>({ kind: 'idle' });
   const shownAt = useRef(performance.now());
+  const busy = save.kind === 'saving' || save.kind === 'retrying';
 
   const load = useCallback(async () => {
     try {
@@ -76,23 +81,67 @@ function LabelView({ annotator }: { annotator: string }) {
     }
   }, [annotator]);
 
-  useEffect(() => { void load(); }, [load]);
+  /** Send one pending label; the outbox entry is removed only once the server has it (or refused it for good). */
+  const deliver = useCallback(async (p: Pending) => {
+    try {
+      await withRetry(() => api.label(annotator, p.item_id, p.label, p.seconds), undefined, undefined,
+                      (attempt) => setSave({ kind: 'retrying', attempt }));
+      writeOutbox(annotator, dequeue(readOutbox(annotator), p.item_id));
+      return 'saved' as const;
+    } catch (e) {
+      if (e instanceof HttpError && e.status === 409) {       // labeled differently before: keep the stored label
+        writeOutbox(annotator, dequeue(readOutbox(annotator), p.item_id));
+        setNotice(`Already labeled earlier (${e.message}); your earlier label was kept.`);
+        return 'conflict' as const;
+      }
+      throw e;
+    }
+  }, [annotator]);
 
-  const act = useCallback(async (action: Action) => {
-    if (!task || busy) return;
-    setBusy(true);
+  // On open: resend anything a previous page could not save, then load the next task.
+  useEffect(() => {
+    void (async () => {
+      const pending = readOutbox(annotator);
+      if (pending.length) {
+        setSave({ kind: 'saving' });
+        try {
+          for (const p of pending) await deliver(p);
+          setNotice(`Saved ${pending.length} label${pending.length > 1 ? 's' : ''} left over from before.`);
+          setSave({ kind: 'idle' });
+        } catch (e) {
+          setSave({ kind: 'failed', message: (e as Error).message });
+        }
+      }
+      await load();
+    })();
+  }, [annotator, deliver, load]);
+
+  const submit = useCallback(async (p: Pending) => {
+    setSave({ kind: 'saving' });
     setError('');
     try {
-      const seconds = Math.round((performance.now() - shownAt.current) / 100) / 10;
-      await api.label(annotator, task.item_id, actionToLabel(action), seconds);
-      if (action !== 'skip') setCount((c) => c + 1);
+      const outcome = await deliver(p);
+      if (outcome === 'saved' && p.label !== 'skip') setCount((c) => c + 1);
+      setSave({ kind: 'idle' });
       await load();
     } catch (e) {
-      setError((e as Error).message);
-    } finally {
-      setBusy(false);
+      setSave({ kind: 'failed', message: (e as Error).message });
     }
-  }, [annotator, busy, load, task]);
+  }, [deliver, load]);
+
+  const act = useCallback(async (action: Action) => {
+    if (!task || busy || save.kind === 'failed') return;   // resolve the unsaved label first
+    const p: Pending = { item_id: task.item_id, label: actionToLabel(action),
+                         seconds: Math.round((performance.now() - shownAt.current) / 100) / 10 };
+    writeOutbox(annotator, enqueue(readOutbox(annotator), p));   // survives a reload before the server answers
+    await submit(p);
+  }, [annotator, busy, save.kind, submit, task]);
+
+  const retry = useCallback(async () => {
+    const pending = readOutbox(annotator);
+    if (!pending.length) return setSave({ kind: 'idle' });
+    for (const p of pending) await submit(p);
+  }, [annotator, submit]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -112,8 +161,19 @@ function LabelView({ annotator }: { annotator: string }) {
     <section className="card" aria-labelledby="task-heading">
       <p className="meta">
         <span data-testid="session-count">Labeled this session: {count}</span>
+        <span data-testid="save-state" aria-live="polite">
+          {save.kind === 'saving' && 'Saving…'}
+          {save.kind === 'retrying' && `Connection problem, retrying (${save.attempt})…`}
+        </span>
         {error && <span role="alert" className="error">{error}</span>}
       </p>
+      {save.kind === 'failed' && (
+        <p role="alert" className="error" data-testid="save-failed">
+          Not saved: {save.message}. Your label is kept on this device.{' '}
+          <button onClick={() => void retry()}>Retry now</button>
+        </p>
+      )}
+      {notice && <p className="meta" data-testid="notice">{notice}</p>}
       {task === null ? (
         <p data-testid="empty">The queue is empty. Thank you.</p>
       ) : (
@@ -125,9 +185,9 @@ function LabelView({ annotator }: { annotator: string }) {
           </blockquote>
           <p className="suggestion" data-testid="suggestion">{describeSuggestion(task.suggestion)}</p>
           <div className="actions">
-            <button onClick={() => act('relevant')} disabled={busy}>SUD-relevant <kbd>1</kbd></button>
-            <button onClick={() => act('not_relevant')} disabled={busy}>Not relevant <kbd>0</kbd></button>
-            <button className="secondary" onClick={() => act('skip')} disabled={busy}>Skip <kbd>S</kbd></button>
+            <button onClick={() => act('relevant')} disabled={busy || save.kind === 'failed'}>SUD-relevant <kbd>1</kbd></button>
+            <button onClick={() => act('not_relevant')} disabled={busy || save.kind === 'failed'}>Not relevant <kbd>0</kbd></button>
+            <button className="secondary" onClick={() => act('skip')} disabled={busy || save.kind === 'failed'}>Skip <kbd>S</kbd></button>
           </div>
           <p className="hint">Highlights mark substance-use words to help reading; they are not the answer.</p>
         </>

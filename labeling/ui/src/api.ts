@@ -1,3 +1,5 @@
+import { HttpError } from './outbox';
+
 export interface Task {
   item_id: string;
   text: string;
@@ -37,7 +39,9 @@ async function send<T>(path: string, init?: RequestInit): Promise<T | null> {
   if (res.status === 204) return null;
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
-    throw new Error(body.detail ?? `${res.status} ${res.statusText}`);
+    const detail = body.detail;
+    const message = typeof detail === 'string' ? detail : detail?.message ?? `${res.status} ${res.statusText}`;
+    throw new HttpError(message, res.status, detail);
   }
   return res.json() as Promise<T>;
 }
@@ -45,7 +49,7 @@ async function send<T>(path: string, init?: RequestInit): Promise<T | null> {
 export const api = {
   task: (annotator: string) => send<Task>(`/api/task?annotator=${encodeURIComponent(annotator)}`),
   label: (annotator: string, item_id: string, label: 0 | 1 | 'skip', seconds: number) =>
-    send<{ saved?: boolean }>('/api/labels', { method: 'POST', body: JSON.stringify({ annotator, item_id, label, seconds }) }),
+    send<{ saved?: boolean; duplicate?: boolean }>('/api/labels', { method: 'POST', body: JSON.stringify({ annotator, item_id, label, seconds }) }),
   stats: () => send<Stats>('/api/stats'),
   conflicts: () => send<Conflict[]>('/api/conflicts'),
   adjudicate: (item_id: string, label: 0 | 1, by: string) =>

@@ -19,7 +19,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from labeling.demo_data import demo_rows
-from labeling.workbench import Config, ValidationError, Workbench
+from labeling.workbench import Config, ConflictError, ValidationError, Workbench
 
 UI_DIST = Path(__file__).resolve().parent / 'ui' / 'dist'
 
@@ -29,12 +29,14 @@ class LabelIn(BaseModel):
     item_id: str
     label: int | str
     seconds: float | None = None
+    revise: bool = False
 
 
 class AdjudicationIn(BaseModel):
     item_id: str
     label: int
     by: str
+    overwrite: bool = False
 
 
 def create_app(bench: Workbench) -> FastAPI:
@@ -45,6 +47,8 @@ def create_app(bench: Workbench) -> FastAPI:
             return fn(*args, **kwargs)
         except ValidationError as e:
             raise HTTPException(status_code=422, detail=str(e)) from e
+        except ConflictError as e:
+            raise HTTPException(status_code=409, detail={'message': str(e), 'current': e.current}) from e
 
     @app.get('/api/health')
     def health():
@@ -58,7 +62,7 @@ def create_app(bench: Workbench) -> FastAPI:
     @app.post('/api/labels')
     def label(body: LabelIn):
         value = body.label if body.label == 'skip' else guard(int, body.label) if str(body.label).isdigit() else body.label
-        return guard(bench.submit, body.annotator, body.item_id, value, body.seconds)
+        return guard(bench.submit, body.annotator, body.item_id, value, body.seconds, body.revise)
 
     @app.get('/api/stats')
     def stats():
@@ -70,8 +74,7 @@ def create_app(bench: Workbench) -> FastAPI:
 
     @app.post('/api/adjudicate')
     def adjudicate(body: AdjudicationIn):
-        guard(bench.adjudicate, body.item_id, body.label, body.by)
-        return {'saved': True}
+        return guard(bench.adjudicate, body.item_id, body.label, body.by, body.overwrite)
 
     @app.get('/api/export')
     def export():

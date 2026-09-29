@@ -166,6 +166,28 @@ cd labeling/ui && npm install && npm run build                    # UI served at
 
 Tests: `tests/test_labeling_workbench.py` (queue order, gold scoring, agreement, adjudication, export, API), `labeling/ui/src/logic.test.ts` (Vitest), and `labeling/ui/e2e/workbench.spec.ts`, a Playwright flow run on Chromium, Firefox and WebKit, each against its own demo server. Two annotators label with the keyboard and mouse, disagree, and a reviewer resolves the conflict; a second test checks a 375-pixel-wide phone layout. CI runs all three browsers.
 
+**Reliability.**
+- **Saves:** a retried save with the same label is a no-op, so a network retry never double-counts. A different
+  label, or a second reviewer's conflicting adjudication, returns HTTP 409 with what is stored. Changing a label
+  on purpose is an explicit revision, kept in `label_events`.
+- **UI:** unsaved labels go into an on-device outbox. Network errors and 5xx responses are retried with backoff,
+  and anything left over is sent after a reload. `labeling/ui/e2e/reliability.spec.ts` covers this on all three
+  browsers:
+  - the connection drops after the server stored the label (stored once);
+  - the tab goes offline and reloads (sent once after reload);
+  - the server returns 503 past the automatic retries (manual retry succeeds).
+- **Large queue:** `python -m labeling.benchmark` loads all 46,296 pool reviews into a SQLite
+  file and labels 600. At the 95th percentile:
+
+  | Operation | Time |
+  |---|---:|
+  | Fetch the next task | 12.9 ms |
+  | Save a label | 0.54 ms |
+  | Save that triggers a retrain | 122.15 ms |
+  | Import and first fit (one-time) | 7.57 s |
+
+  Results: `outputs/labeling_benchmark.json`.
+
 ### Counterfactual bias test (September 28, 2026)
 
 Whether a review is about substance use should not depend on who wrote it. `python -m analysis.bert_bias` rewrites each of the 600 test reviews two ways and measures how often the text-only DistilBERT changes its answer: with gender words swapped, and with an identity statement in front ("As a Black woman, ..."). Neutral prefixes ("As a person, ...") are the control. A prefix pushes the end of long reviews past the 128-token limit (266 of the 600 are longer), and the control measures that effect alone. The pass criterion, fixed before running, is at most 2% of predictions flipping for every perturbation.

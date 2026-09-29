@@ -8,7 +8,7 @@ from fastapi.testclient import TestClient
 from labeling.active_learning import labels_to_reach, pick_batch, uncertainty_order
 from labeling.demo_data import demo_rows
 from labeling.server import create_app
-from labeling.workbench import Config, ValidationError, Workbench, highlight_spans
+from labeling.workbench import Config, ConflictError, ValidationError, Workbench, highlight_spans
 
 
 @pytest.fixture
@@ -104,11 +104,37 @@ def test_submit_rejects_bad_input_and_double_labels(data):
         b.submit('', t['item_id'], 1)
     with pytest.raises(ValidationError):
         b.submit('ana', 'nope', 1)
-    b.submit('ana', t['item_id'], 1)
-    with pytest.raises(ValidationError):
-        b.submit('ana', t['item_id'], 0)
+    assert b.submit('ana', t['item_id'], 1) == {'saved': True}
     b.submit('ana', b.next_task('ana')['item_id'], 'skip')
     assert b.stats()['annotators'][0]['labels'] == 1
+
+
+def test_retries_are_idempotent_and_changes_need_an_explicit_revision(data):
+    rows, gold, truth = data
+    b = bench(rows, gold, overlap_rate=0)
+    item = b.next_task('ana')['item_id']
+    b.submit('ana', item, 1, 3.0)
+    assert b.submit('ana', item, 1, 3.0) == {'saved': True, 'duplicate': True}      # network retry
+    with pytest.raises(ConflictError) as err:
+        b.submit('ana', item, 0)
+    assert err.value.current == {'item_id': item, 'annotator': 'ana', 'label': 1}
+    assert b.submit('ana', item, 0, revise=True) == {'saved': True, 'revised': True}
+    assert b.resolved()[item] == 0 and b.stats()['annotators'][0]['labels'] == 1
+    events = [r[0] for r in b.db.execute('SELECT action FROM label_events WHERE item_id = ? ORDER BY id', (item,))]
+    assert events == ['label', 'revise']
+
+
+def test_conflicting_adjudications_are_refused_unless_overwritten(data):
+    rows, gold, truth = data
+    b = bench(rows, gold)
+    item = rows[1]['id']
+    assert b.adjudicate(item, 1, 'lead') == {'saved': True}
+    assert b.adjudicate(item, 1, 'second reviewer') == {'saved': True, 'duplicate': True}
+    with pytest.raises(ConflictError) as err:
+        b.adjudicate(item, 0, 'second reviewer')
+    assert err.value.current['by'] == 'lead'
+    assert b.adjudicate(item, 0, 'second reviewer', overwrite=True) == {'saved': True}
+    assert b.resolved()[item] == 0
 
 
 def test_export_has_only_resolved_non_gold_labels(data):
@@ -150,6 +176,10 @@ def test_http_api_round_trip(data):
     assert [c['item_id'] for c in client.get('/api/conflicts').json()] == [t['item_id']]
     assert client.post('/api/adjudicate', json={'item_id': t['item_id'], 'label': truth[t['item_id']],
                                                 'by': 'lead'}).json() == {'saved': True}
+    clash = client.post('/api/adjudicate', json={'item_id': t['item_id'], 'label': 1 - truth[t['item_id']], 'by': 'x'})
+    assert clash.status_code == 409 and clash.json()['detail']['current']['by'] == 'lead'
+    again = client.post('/api/labels', json={'annotator': 'ana', 'item_id': t['item_id'], 'label': truth[t['item_id']]})
+    assert again.json() == {'saved': True, 'duplicate': True}
     lines = client.get('/api/export').text.splitlines()
     assert json.loads(lines[0])['adjudicated'] is True
     assert client.get('/api/stats').json()['conflicts'] == 0

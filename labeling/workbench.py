@@ -46,6 +46,9 @@ CREATE TABLE IF NOT EXISTS labels (id INTEGER PRIMARY KEY AUTOINCREMENT, item_id
                                    label INTEGER NOT NULL, seconds REAL, created REAL NOT NULL,
                                    UNIQUE(item_id, annotator));
 CREATE TABLE IF NOT EXISTS skips (item_id TEXT NOT NULL, annotator TEXT NOT NULL, PRIMARY KEY(item_id, annotator));
+CREATE TABLE IF NOT EXISTS label_events (id INTEGER PRIMARY KEY AUTOINCREMENT, item_id TEXT NOT NULL,
+                                         annotator TEXT NOT NULL, label INTEGER NOT NULL, action TEXT NOT NULL,
+                                         at REAL NOT NULL);
 CREATE TABLE IF NOT EXISTS adjudications (item_id TEXT PRIMARY KEY, label INTEGER NOT NULL, by TEXT NOT NULL,
                                           created REAL NOT NULL);
 CREATE TABLE IF NOT EXISTS model_runs (id INTEGER PRIMARY KEY AUTOINCREMENT, labels INTEGER NOT NULL,
@@ -55,6 +58,13 @@ CREATE TABLE IF NOT EXISTS model_runs (id INTEGER PRIMARY KEY AUTOINCREMENT, lab
 
 class ValidationError(ValueError):
     pass
+
+
+class ConflictError(ValueError):
+    """The request disagrees with what is already stored (HTTP 409); `current` describes the stored state."""
+    def __init__(self, message: str, current: dict):
+        super().__init__(message)
+        self.current = current
 
 
 def highlight_spans(text: str) -> list[list[int]]:
@@ -170,14 +180,24 @@ class Workbench:
                 for i, votes in self._labels_by_item().items()
                 if len({v for _, v in votes}) > 1 and i not in adj]
 
-    def adjudicate(self, item_id: str, label: int, by: str) -> None:
+    def adjudicate(self, item_id: str, label: int, by: str, overwrite: bool = False) -> dict:
+        """Record a reviewer's decision. Repeating the same decision is a no-op; a different decision on an item
+        someone already adjudicated is a conflict unless `overwrite` is set."""
         if label not in LABELS or not by.strip():
             raise ValidationError('label must be 0 or 1 and a reviewer name is required')
-        with self.lock, self.db:
+        with self.lock:
             if not self.db.execute('SELECT 1 FROM items WHERE id = ?', (item_id,)).fetchone():
                 raise ValidationError(f'unknown item {item_id}')
-            self.db.execute('INSERT OR REPLACE INTO adjudications VALUES (?,?,?,?)', (item_id, label, by.strip(), time.time()))
+            prior = self.db.execute('SELECT label, by FROM adjudications WHERE item_id = ?', (item_id,)).fetchone()
+            if prior and prior[0] == label:
+                return {'saved': True, 'duplicate': True}
+            if prior and not overwrite:
+                raise ConflictError(f'already resolved as {LABELS[prior[0]]} by {prior[1]}',
+                                    {'item_id': item_id, 'label': prior[0], 'by': prior[1]})
+            with self.db:
+                self.db.execute('INSERT OR REPLACE INTO adjudications VALUES (?,?,?,?)', (item_id, label, by.strip(), time.time()))
         self.retrain()
+        return {'saved': True}
 
     # ── model ─────────────────────────────────────────────────────────────
     def retrain(self) -> dict | None:
@@ -238,7 +258,10 @@ class Workbench:
                 return self._task(self._ids[cand[0]])
             return self._task(self._ids[cand[uncertainty_order(self._prob[cand])[0]]])
 
-    def submit(self, annotator: str, item_id: str, label, seconds: float | None = None) -> dict:
+    def submit(self, annotator: str, item_id: str, label, seconds: float | None = None, revise: bool = False) -> dict:
+        """Save a label. Retrying the same label is idempotent (a network retry must not double-count); a different
+        label for an item this annotator already labeled is a conflict unless `revise` is set, and revisions are
+        kept in label_events."""
         annotator = (annotator or '').strip()
         if not annotator:
             raise ValidationError('annotator is required')
@@ -252,11 +275,26 @@ class Workbench:
             row = self.db.execute('SELECT gold FROM items WHERE id = ?', (item_id,)).fetchone()
             if row is None:
                 raise ValidationError(f'unknown item {item_id}')
+            prior = self.db.execute('SELECT label FROM labels WHERE item_id = ? AND annotator = ?',
+                                    (item_id, annotator)).fetchone()
+            if prior and prior[0] == int(label):
+                return {'saved': True, 'duplicate': True}
+            if prior and not revise:
+                raise ConflictError(f'already labeled {LABELS[prior[0]]} by {annotator}',
+                                    {'item_id': item_id, 'annotator': annotator, 'label': prior[0]})
+            now = time.time()
             with self.db:
-                cur = self.db.execute('INSERT OR IGNORE INTO labels (item_id, annotator, label, seconds, created) '
-                                      'VALUES (?,?,?,?,?)', (item_id, annotator, int(label), seconds, time.time()))
-            if cur.rowcount == 0:
-                raise ValidationError('this annotator already labeled the item')
+                if prior:
+                    self.db.execute('UPDATE labels SET label = ?, created = ? WHERE item_id = ? AND annotator = ?',
+                                    (int(label), now, item_id, annotator))
+                else:
+                    self.db.execute('INSERT INTO labels (item_id, annotator, label, seconds, created) VALUES (?,?,?,?,?)',
+                                    (item_id, annotator, int(label), seconds, now))
+                self.db.execute('INSERT INTO label_events (item_id, annotator, label, action, at) VALUES (?,?,?,?,?)',
+                                (item_id, annotator, int(label), 'revise' if prior else 'label', now))
+            if prior:
+                self.retrain()
+                return {'saved': True, 'revised': True}
             out = {'saved': True}
             if row[0] is None:
                 self._since_retrain += 1

@@ -1,0 +1,36 @@
+{
+ "generated": "2026-09-29 10:15",
+ "machine": "arm64 Darwin 25.6.0, Python 3.12.14",
+ "storage": "SQLite file",
+ "items": {
+  "accepted": 46296,
+  "duplicates": 2,
+  "too_short": 9,
+  "invalid": 0,
+  "gold": 100
+ },
+ "import_and_first_fit_s": 7.57,
+ "annotator_labels": 600,
+ "next_task": {
+  "calls": 600,
+  "median_ms": 11.03,
+  "p95_ms": 12.9,
+  "max_ms": 21.36
+ },
+ "submit": {
+  "calls": 579,
+  "median_ms": 0.38,
+  "p95_ms": 0.54,
+  "max_ms": 4.2
+ },
+ "submit_with_retrain_every_25": {
+  "calls": 21,
+  "median_ms": 103.56,
+  "p95_ms": 122.15,
+  "max_ms": 134.87
+ },
+ "stats_ms": 40.1,
+ "export_ms": 30.2,
+ "exported_labels": 540,
+ "model_test_ap_after_last_retrain": 0.8463
+}
