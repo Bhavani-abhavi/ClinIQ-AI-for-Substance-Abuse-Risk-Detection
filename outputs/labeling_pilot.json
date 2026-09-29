@@ -1,0 +1,77 @@
+{
+ "generated": "2026-09-29 11:06",
+ "setup": {
+  "items": 60,
+  "positive_share": 0.5,
+  "suggestion_model": "TF-IDF + logistic regression",
+  "suggestion_training_reviews": 3970,
+  "suggestion_training_balance": "50/50, disjoint from pilot items",
+  "suggestion_accuracy_vs_proxy_on_pilot_items": 0.75,
+  "seed": 11,
+  "max_words": 120
+ },
+ "items": 60,
+ "annotators": 1,
+ "labels": 56,
+ "excluded_as_unseen": {
+  "rule": "labels under 0.3 s",
+  "labels": [
+   {
+    "item_id": "p203462",
+    "annotator": "Rahul",
+    "condition": "manual",
+    "seconds": 0.1
+   },
+   {
+    "item_id": "p72218",
+    "annotator": "Rahul",
+    "condition": "manual",
+    "seconds": 0.0
+   },
+   {
+    "item_id": "p70379",
+    "annotator": "Rahul",
+    "condition": "manual",
+    "seconds": 0.1
+   },
+   {
+    "item_id": "p14425",
+    "annotator": "Rahul",
+    "condition": "manual",
+    "seconds": 0.0
+   }
+  ]
+ },
+ "by_condition": {
+  "assisted": {
+   "labels": 30,
+   "median_seconds": 6.6,
+   "agreement_with_proxy": 0.633,
+   "agreement_with_corrected_proxy": 0.733,
+   "followed_suggestion": 0.6,
+   "suggestion_wrong_vs_proxy": 7,
+   "followed_a_wrong_suggestion": 3
+  },
+  "manual": {
+   "labels": 26,
+   "median_seconds": 7.0,
+   "agreement_with_proxy": 0.615,
+   "agreement_with_corrected_proxy": 0.769
+  }
+ },
+ "per_annotator": {
+  "Rahul": {
+   "labels": 56,
+   "median_seconds": {
+    "assisted": 6.6,
+    "manual": 7.0
+   },
+   "time_ratio_assisted_to_manual": 0.94
+  }
+ },
+ "inter_annotator": {
+  "items_with_two_labels": 0,
+  "cohen_kappa": null
+ },
+ "reference": "proxy label (keyword rule on the review condition), not clinical truth"
+}

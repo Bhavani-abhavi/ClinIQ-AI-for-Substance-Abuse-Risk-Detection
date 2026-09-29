@@ -137,6 +137,19 @@ intake ─▶ evaluate ─▶ write_draft ─▶ check ─┬─ REVISE (≤2) �
 Tests: `tests/test_prior_auth.py` (engine statuses, auto-approval and audit, clinician-only denial, checker
 catches for status, citation, number and denial-language errors, revision and template fallback).
 
+## Proxy-label correction (September 29, 2026)
+
+The human labeling pilot below disagreed with the proxy label far more often than expected, and reading the
+disagreements showed why: "meth" was matched as a substring, so reviews of methylphenidate, sulfamethoxazole,
+methylprednisolone, dextromethorphan and indomethacin counted as substance-use related. **803 of 3,316
+proxy-positive reviews (24%) were positive only because of that.** "meth" must now be a whole word
+(`analysis/sud_labels.py`, `data/load_reviews.py` and the rules baseline); methamphetamine and methadone still match.
+Test: `test_meth_matches_only_as_a_whole_word`.
+
+Every offline result in this README (active learning, DistilBERT, the bias test and the trend numbers) was rerun
+on the corrected labels. The original team benchmark (rules F1 0.854, LLM+RAG precision 0.938) needs the database
+and a paid API, so it was not rerun; it was scored against the old labels.
+
 ## Labeling workbench with active learning (September 28, 2026)
 
 Proxy labels made every result above possible, and every result above is limited by them. `labeling/` is the tool for replacing them with human labels at the lowest labeling cost.
@@ -150,11 +163,11 @@ Proxy labels made every result above possible, and every result above is limited
 
 | Labels | Random: average precision | Uncertainty: average precision | Random: relevant reviews found | Uncertainty: relevant reviews found |
 |---|---|---|---|---|
-| 500 | 0.718 | 0.784 | 29 | 203 |
-| 1,000 | 0.754 | 0.848 | 58 | 449 |
-| 3,000 | 0.812 | 0.910 | 172 | 1,046 |
+| 500 | 0.776 | 0.808 | 24 | 215 |
+| 1,000 | 0.818 | 0.874 | 45 | 457 |
+| 3,000 | 0.846 | 0.928 | 131 | 1,007 |
 
-Trained on all 46,307 pool labels, the model reaches average precision 0.917. Uncertainty sampling gets to 95% of that (0.872) with **1,500 labels**; random sampling needs **11,000**, 7.3 times as many. Average precision is used because the pool is about 6% positive and the test set is 50% positive: small models put almost every test review below 0.5, so F1 at a fixed threshold would mostly measure that prior shift. The proxy labels stand in for annotators, so no human labeling time is measured. Results: `outputs/active_learning.json`.
+Trained on all 46,307 pool labels, the model reaches average precision 0.941. Uncertainty sampling gets to 95% of that (0.894) with **1,300 labels**; random sampling needs **10,000**, 7.7 times as many. Average precision is used because the pool is about 6% positive and the test set is 50% positive: small models put almost every test review below 0.5, so F1 at a fixed threshold would mostly measure that prior shift. The proxy labels stand in for annotators, so no human labeling time is measured. Results: `outputs/active_learning.json`.
 
 Run it:
 
@@ -181,10 +194,10 @@ Tests: `tests/test_labeling_workbench.py` (queue order, gold scoring, agreement,
 
   | Operation | Time |
   |---|---:|
-  | Fetch the next task | 12.9 ms |
-  | Save a label | 0.54 ms |
-  | Save that triggers a retrain | 122.15 ms |
-  | Import and first fit (one-time) | 7.57 s |
+  | Fetch the next task | 14.2 ms |
+  | Save a label | 0.6 ms |
+  | Save that triggers a retrain | 134.8 ms |
+  | Import and first fit (one-time) | 8.14 s |
 
   Results: `outputs/labeling_benchmark.json`.
 
@@ -195,26 +208,35 @@ Tests: `tests/test_labeling_workbench.py` (queue order, gold scoring, agreement,
   practice effects cancel and every item is seen both ways. The server assigns the condition.
 - **Report:** time per item, agreement with the proxy label and between annotators, and how often an annotator
   followed a suggestion that was wrong.
-- **Status:** no results yet; they appear here only after people have labeled.
+- **Results so far (one reviewer, 60 reviews, September 29, 2026):** `outputs/labeling_pilot.json`
+  - Median time per review: 6.6 s assisted vs. 7.0 s manual. Suggestions barely changed speed.
+  - Agreement with the corrected proxy label: 73% assisted vs. 77% manual. The reviewer followed the suggestion
+    60% of the time, and followed a wrong one 3 times out of 7.
+  - 4 labels arrived 50–80 ms after the previous one: a double press had labeled an unseen review. The UI now
+    ignores key repeat and any label in the first 300 ms, and the report excludes labels under 0.3 s.
+  - The biggest finding was the proxy-label bug above, found by reading where the reviewer and the proxy disagreed.
+  - With one reviewer there is no inter-annotator agreement (Cohen's kappa) yet; a second reviewer is the next step.
 - **Design notes:** `docs/labeling-architecture.md` covers the queue, quality checks, adjudication and export;
   `docs/ai-assisted-engineering.md` covers how changes were checked.
 
 ### Counterfactual bias test (September 28, 2026)
 
-Whether a review is about substance use should not depend on who wrote it. `python -m analysis.bert_bias` rewrites each of the 600 test reviews two ways and measures how often the text-only DistilBERT changes its answer: with gender words swapped, and with an identity statement in front ("As a Black woman, ..."). Neutral prefixes ("As a person, ...") are the control. A prefix pushes the end of long reviews past the 128-token limit (266 of the 600 are longer), and the control measures that effect alone. The pass criterion, fixed before running, is at most 2% of predictions flipping for every perturbation.
+Whether a review is about substance use should not depend on who wrote it. `python -m analysis.bert_bias` rewrites each of the 600 test reviews two ways and measures how often the text-only DistilBERT changes its answer: with gender words swapped, and with an identity statement in front ("As a Black woman, ..."). Neutral prefixes ("As a person, ...") are the control. A prefix pushes the end of long reviews past the 128-token limit (293 of the 600 are longer), and the control measures that effect alone. The pass criterion, fixed before running, is at most 2% of predictions flipping for every perturbation.
 
 | Perturbation | Original model | After counterfactual augmentation |
 |---|---|---|
-| Gender words swapped | 1.0% | 0.0% |
-| Neutral prefix (control: person / patient) | 2.8% / 2.2% | 1.7% / 2.3% |
-| Worst identity statement | 9.0% ("gay man") | 3.0% ("person on disability") |
-| "Gay man" | 9.0% | 2.2% |
-| Identities above the control's flip rate by more than 1 point | 8 of 12 | 0 of 12 |
-| F1 on the 600 test reviews | 0.873 | 0.871 |
+| Gender words swapped | 0.0% | 0.0% |
+| Neutral prefix (control: person / patient) | 2.0% / 2.0% | 1.2% / 1.5% |
+| Worst identity statement | 3.7% ("single mother") | 2.2% ("single mother", "person on disability") |
+| "Gay man" | 2.8% | 1.2% |
+| Identities above the control's flip rate by more than 1 point | 1 of 12 | 0 of 12 |
+| F1 on the 600 test reviews | 0.914 | 0.911 |
 
-The original model failed: identity statements flipped 2.5–9.0% of predictions, mostly toward "not relevant" (196 of 318 flips; 51 of 54 for "gay man"). The fix is counterfactual data augmentation: `python -m analysis.bert_classifier --text-only --augment-identity` rewrites half the training reviews with an identity statement and, half of those times, swapped gender words, leaving the labels unchanged. The training identities are a different list from the tested ones, so the test measures generalization, not memorized phrases. After retraining, every tested identity is within 0.7 points of the neutral control and F1 is similar (0.873 to 0.871). **The model still fails the 2% criterion**: four identities flip 2.2–3.0%, about the same as truncation alone. Handling long reviews (a longer context, or head-and-tail truncation) is the next fix. The gender swap is word-level and approximate ("her" always becomes "his"). The reviews carry no demographic fields, so this measures sensitivity to identity words, not outcome parity between real groups.
+With the corrected labels, the original model failed narrowly. "Single mother" flipped 3.7% of predictions, all 22 toward "not relevant", against 2.0% for the neutral controls, and "gay man" flipped 2.8% (15 of 17 toward "not relevant"). Across all identities the flips went both ways (89 toward "not relevant", 77 toward "relevant"). Before the label fix, the same test showed up to 9.0%; the corrected test set has different positives, so the two runs are not directly comparable.
 
-Results: `outputs/bert_bias.json` (original) and `outputs/bert_bias_cda.json` (augmented), with the augmented model's accuracy in `outputs/bert_eval_textonly_cda.json` (W&B run `54liflfc`). Tests: `tests/test_bert_bias.py`.
+The fix is counterfactual data augmentation: `python -m analysis.bert_classifier --text-only --augment-identity` rewrites half the training reviews with an identity statement and, half of those times, swapped gender words, leaving the labels unchanged. The training identities are a different list from the tested ones, so the test measures generalization, not memorized phrases. After retraining, every tested identity is within 0.7 points of the neutral control and F1 is similar (0.914 to 0.911). **The model still fails the 2% criterion**: two identities flip 2.2%, close to what truncation alone does (1.2–1.5%; 293 of the 600 reviews exceed 128 tokens). Handling long reviews (a longer context, or head-and-tail truncation) is the next fix. The gender swap is word-level and approximate ("her" always becomes "his"). The reviews carry no demographic fields, so this measures sensitivity to identity words, not outcome parity between real groups.
+
+Results: `outputs/bert_bias.json` (original) and `outputs/bert_bias_cda.json` (augmented), with the augmented model's accuracy in `outputs/bert_eval_textonly_cda.json` (W&B run `6e1h1mac`). Tests: `tests/test_bert_bias.py`.
 
 ## Architecture
 
@@ -253,6 +275,8 @@ Public Review Rows (52,184)
 
 ### Detection Performance (600-record balanced proxy-label comparison)
 
+The original team benchmark, scored against the proxy labels before the September 29 correction.
+
 | Method | Precision | Recall | F1 | Best Use Case |
 |--------|-----------|--------|----|---------------|
 | Rule-Based (ICD-10 vocab) | 0.861 | 0.847 | **0.854** | Keyword-proxy baseline |
@@ -264,19 +288,19 @@ Public Review Rows (52,184)
 `analysis/bert_classifier.py` fine-tunes `distilbert-base-uncased` with the Hugging Face Trainer (2 epochs, CPU) and logs each run to Weights & Biases, offline by default.
 
 - **Labels** are the project's keyword proxy (the review's condition, falling back to the drug name), not clinician adjudication.
-- **Test set:** the original recipe, rebuilt: 300 SUD-relevant reviews (the 60 most useful per signal category) plus 300 non-SUD reviews drawn with a fixed seed. Test review texts are removed from training, because the dataset repeats reviews under brand and generic names. Training uses 7,366 reviews (positives plus twice as many negatives) and 818 for validation.
-- **Rules** are the patient-voice keyword dictionary re-run on the same 600. The original benchmark also added ICD-10 terms from the database, which isn't available offline, so the rules score 0.841 here instead of 0.854.
+- **Test set:** the original recipe, rebuilt: 300 SUD-relevant reviews (the 60 most useful per signal category) plus 300 non-SUD reviews drawn with a fixed seed. Test review texts are removed from training, because the dataset repeats reviews under brand and generic names. Training uses 5,349 reviews (positives plus twice as many negatives) and 594 for validation.
+- **Rules** are the patient-voice keyword dictionary re-run on the same 600. The original benchmark also added ICD-10 terms from the database, which isn't available offline, and the labels have since been corrected, so the rules score 0.846 here instead of 0.854.
 
 | Inputs | Method | Precision | Recall | F1 | AUROC |
 |---|---|---|---|---|---|
-| Review text only | Fine-tuned DistilBERT | 0.910 | 0.840 | **0.873** | 0.950 |
-| Review text only | Keyword rules | 0.871 | 0.677 | 0.762 | – |
-| Drug name + review | Fine-tuned DistilBERT | 1.000 | 0.873 | 0.932 | 0.990 |
-| Drug name + review | Keyword rules | 0.886 | 0.800 | 0.841 | – |
+| Review text only | Fine-tuned DistilBERT | 0.922 | 0.907 | **0.914** | 0.963 |
+| Review text only | Keyword rules | 0.906 | 0.707 | 0.794 | – |
+| Drug name + review | Fine-tuned DistilBERT | 0.990 | 0.957 | 0.973 | 0.996 |
+| Drug name + review | Keyword rules | 0.915 | 0.787 | 0.846 | – |
 
-**Read the text-only rows first.** The drug name can set the proxy label by itself (a Suboxone review is labeled SUD-relevant whatever it says), so the drug-name rows partly measure who learns drug names. On review text alone, the fine-tuned model finds 49 more of the 300 SUD-relevant reviews than the rules, with 5 fewer false positives.
+**Read the text-only rows first.** The drug name can set the proxy label by itself (a Suboxone review is labeled SUD-relevant whatever it says), so the drug-name rows partly measure who learns drug names. On review text alone, the fine-tuned model finds 60 more of the 300 SUD-relevant reviews than the rules, with 1 more false positive.
 
-**Limits.** The test positives are the most-upvoted reviews in each category, which tend to be explicit. On the random validation split, text-only F1 is 0.755, so expect lower numbers on ordinary reviews. Both labels and test set are proxies; clinician-labeled data would be needed before any clinical use.
+**Limits.** The test positives are the most-upvoted reviews in each category, which tend to be explicit. On the random validation split, text-only F1 is 0.834, so expect lower numbers on ordinary reviews. Both labels and test set are proxies; clinician-labeled data would be needed before any clinical use.
 
 Reproduce (about 30 minutes per run on an Apple M3 CPU; `pip install -r requirements-bert.txt`):
 
@@ -287,13 +311,15 @@ python -m analysis.bert_classifier --csv /path/to/drugsComTest_raw.csv --rules-o
 wandb sync outputs/wandb/offline-run-*                                                      # after `wandb login`
 ```
 
-Results are in `outputs/bert_eval.json` and `outputs/bert_eval_textonly.json` (W&B runs `w3fu0hzl` and `nkcre65v`, project `cliniq-sud-detection`). Model weights (`models/bert-sud*/`) and W&B run files (`outputs/wandb/`) are not committed. `tests/test_bert_splits.py` checks the split, label and baseline logic without downloading a model.
+Results are in `outputs/bert_eval.json` and `outputs/bert_eval_textonly.json` (W&B runs `wrl90u8f` and `hv516rx2`, project `cliniq-sud-detection`). Model weights (`models/bert-sud*/`) and W&B run files (`outputs/wandb/`) are not committed. `tests/test_bert_splits.py` checks the split, label and baseline logic without downloading a model.
 
 ### Temporal Findings (2008–2017 opioid crisis arc)
 
-- **3× volume surge**: SUD review volume from 2014→2016 tracks the CDC-documented fentanyl influx
-- **18× distress escalation**: Patient distress proportion rose from 1.7% (2008) to 30.5% (2017)
-- **Composition shift**: Opioid-specific proportion fell 40%→16% while total distress rose — the crisis diversified beyond opioids
+Recomputed on the corrected labels (`python -m analysis.temporal_check --csv ...` → `outputs/temporal_corrected.json`; `outputs/temporal_trends.csv` predates the fix):
+
+- **2.5× volume surge**: SUD review volume rose from 160 (2014) to 398 (2016), in line with the CDC-documented fentanyl influx
+- **12× rise in low ratings**: the share of SUD reviews rated 3/10 or below rose from 2.0% (2008) to 24.8% (2017)
+- **Composition shift**: the opioid share of SUD reviews fell from 62% to 33% while low ratings rose; the crisis diversified beyond opioids
 
 ### Financial interpretation
 

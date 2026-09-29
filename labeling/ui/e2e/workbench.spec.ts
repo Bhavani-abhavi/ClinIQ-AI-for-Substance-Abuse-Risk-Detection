@@ -27,6 +27,7 @@ test('annotators label, disagree, and a reviewer resolves the conflict', async (
   for (const [k, key] of ['1', '0', '1', '0'].entries()) {
     const before = await currentItem(ana);
     sawHighlight ||= (await ana.locator('blockquote mark').count()) > 0;
+    await ana.waitForTimeout(350);                   // a person needs to see the item first
     await ana.keyboard.press(key);
     await expect(ana.getByTestId('session-count')).toHaveText(`Labeled this session: ${k + 1}`);
     await expect.poll(() => currentItem(ana)).not.toBe(before);
@@ -45,6 +46,7 @@ test('annotators label, disagree, and a reviewer resolves the conflict', async (
   const ben = await (await browser.newContext()).newPage();
   await signIn(ben, 'ben');
   expect(await currentItem(ben)).toBe(first);
+  await ben.waitForTimeout(350);
   await ben.getByRole('button', { name: /Not relevant/ }).click();
   await expect(ben.getByTestId('session-count')).toHaveText('Labeled this session: 1');
 
@@ -69,6 +71,7 @@ test('layout works on a phone-sized screen', async ({ browser }) => {
   await currentItem(page);
   const width = await page.evaluate(() => document.documentElement.scrollWidth);
   expect(width).toBeLessThanOrEqual(375);
+  await page.waitForTimeout(350);
   await page.getByRole('button', { name: /SUD-relevant/ }).click();
   await expect(page.getByTestId('session-count')).toHaveText('Labeled this session: 1');
 });

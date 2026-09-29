@@ -1,0 +1,57 @@
+{
+ "label": "corrected proxy (whole-word \"meth\")",
+ "sud_reviews": 2513,
+ "distress_definition": "rating <= 3 of 10",
+ "by_year": {
+  "2008": {
+   "sud_reviews": 149,
+   "distress_share": 0.0201,
+   "opioid_share": 0.6242
+  },
+  "2009": {
+   "sud_reviews": 307,
+   "distress_share": 0.0912,
+   "opioid_share": 0.5668
+  },
+  "2010": {
+   "sud_reviews": 186,
+   "distress_share": 0.0538,
+   "opioid_share": 0.4892
+  },
+  "2011": {
+   "sud_reviews": 196,
+   "distress_share": 0.051,
+   "opioid_share": 0.551
+  },
+  "2012": {
+   "sud_reviews": 147,
+   "distress_share": 0.0272,
+   "opioid_share": 0.517
+  },
+  "2013": {
+   "sud_reviews": 177,
+   "distress_share": 0.0226,
+   "opioid_share": 0.5141
+  },
+  "2014": {
+   "sud_reviews": 160,
+   "distress_share": 0.0563,
+   "opioid_share": 0.5
+  },
+  "2015": {
+   "sud_reviews": 398,
+   "distress_share": 0.1382,
+   "opioid_share": 0.304
+  },
+  "2016": {
+   "sud_reviews": 398,
+   "distress_share": 0.2035,
+   "opioid_share": 0.294
+  },
+  "2017": {
+   "sud_reviews": 395,
+   "distress_share": 0.2481,
+   "opioid_share": 0.3342
+  }
+ }
+}

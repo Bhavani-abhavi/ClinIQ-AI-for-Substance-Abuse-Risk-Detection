@@ -49,7 +49,7 @@ quality view flags both annotators as too fast: that check is working as intende
 | Piece | File | Role |
 |---|---|---|
 | Queue, quality, adjudication, export | `labeling/workbench.py` | One SQLite store; all reads and writes under one lock |
-| Active learning | `labeling/active_learning.py` | Uncertainty ranking; the simulation behind the 1,500 vs. 11,000 result |
+| Active learning | `labeling/active_learning.py` | Uncertainty ranking; the simulation behind the 1,300 vs. 10,000 result |
 | API | `labeling/server.py` | FastAPI; 422 for bad input, 409 with the stored state for conflicts |
 | UI | `labeling/ui/` | React + TypeScript; keyboard-first; on-device outbox for unsaved labels |
 | Pilot | `labeling/pilot.py` | Assisted vs. manual comparison with server-chosen conditions |
@@ -66,7 +66,7 @@ quality view flags both annotators as too fast: that check is working as intende
 
 1. **Uncertainty sampling, measured by average precision.** The pool is about 6% relevant, so the model learns
    most from reviews near its boundary. In a proxy-label simulation, it reached 95% of full-pool average
-   precision with 1,500 labels vs. 11,000 for random sampling. F1 at a fixed 0.5 threshold was rejected as the
+   precision with 1,300 labels vs. 10,000 for random sampling (corrected labels). F1 at a fixed 0.5 threshold was rejected as the
    metric: the test set is 50% positive, so small models put almost everything below 0.5, and F1 measured that
    prior shift rather than learning.
 2. **Cold start.** Before the model has seen both classes, the queue alternates keyword-rich and random-order
@@ -81,12 +81,14 @@ quality view flags both annotators as too fast: that check is working as intende
    - A retried save with the same label is a no-op, so a lost response can't double-count.
    - A different label from the same annotator, or a clashing adjudication, returns 409 with what's stored.
    - Deliberate changes are revisions, logged in `label_events`.
-5. **The client never loses a label.** Labels wait in an on-device outbox until the server confirms them.
+5. **No label for an unseen item.** Key repeat is ignored, and a label in the first 300 ms after an item appears
+   doesn't count. The human pilot showed 4 of 60 labels arriving 50 to 80 ms after the previous one.
+6. **The client never loses a label.** Labels wait in an on-device outbox until the server confirms them.
    Network errors and 5xx are retried with backoff, and leftovers are sent after a reload. New labels are
    blocked while one is unsaved, so the order stays clear.
-6. **The server decides pilot conditions.** Which items are assisted can't be changed by the client, so the
+7. **The server decides pilot conditions.** Which items are assisted can't be changed by the client, so the
    comparison can't be skewed from the browser.
-7. **One SQLite connection, one lock.** Simple and fast enough: 12.9 ms at the 95th percentile to fetch the
+8. **One SQLite connection, one lock.** Simple and fast enough: 14.2 ms at the 95th percentile to fetch the
    next task with 46,296 reviews. Every path must hold the lock, though. Stats and export once read without
    it, and concurrent requests corrupted results under test load. A threaded stress test now fails 5 of 5
    runs without the lock and 0 of 5 with it.
@@ -112,7 +114,7 @@ quality view flags both annotators as too fast: that check is working as intende
 
 - **Postgres instead of SQLite:** row-level locking instead of one process-wide lock, and several server
   workers.
-- **Retraining as a background job:** today a retrain adds about 100 ms to one save in 25.
+- **Retraining as a background job:** today a retrain adds about 130 ms to one save in 25.
 - **Accounts and roles** (annotator, reviewer, admin) instead of typed names; audit of who saw what.
 - **Batch selection with diversity:** several annotators at once shouldn't all get near-duplicates of the
   same uncertain review.

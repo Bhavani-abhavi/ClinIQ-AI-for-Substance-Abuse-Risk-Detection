@@ -80,3 +80,16 @@ def test_text_only_rules_ignore_the_drug_name():
     r = rule_baselines(frame)
     assert (r['rule_based_static_keywords']['tp'], r['rule_based_static_keywords']['fp']) == (1, 1)
     assert (r['rule_based_text_only']['tp'], r['rule_based_text_only']['fp']) == (0, 1)
+
+
+def test_meth_matches_only_as_a_whole_word():
+    from analysis.detection import rule_classify
+    for drug in ('Methylphenidate', 'Sulfamethoxazole / trimethoprim', 'Dextromethorphan', 'Indomethacin',
+                 'Methylprednisolone', 'Promethazine'):
+        assert not contains_keyword(drug), drug
+    for text in ('Methadone', 'Methamphetamine', 'relapsed on meth', 'Meth addiction'):
+        assert contains_keyword(text), text
+    assert signal_category('ADHD', 'Methylphenidate', 'helped my focus') == 'other_sud'   # only called for positives
+    kw = {'stimulant': ['meth']}
+    assert rule_classify('methylphenidate helped my focus', 'Methylphenidate', kw)[0] == 0
+    assert rule_classify('I used meth for years', 'Suboxone', kw)[0] == 1

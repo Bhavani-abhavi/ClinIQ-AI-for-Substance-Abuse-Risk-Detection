@@ -137,10 +137,16 @@ class PilotStudy:
 
     # ── report ───────────────────────────────────────────────────────────
     @_locked
-    def report(self) -> dict:
+    def report(self, min_seconds: float = 0.3, corrected_proxy: dict | None = None) -> dict:
+        """`min_seconds`: labels faster than this were made before the item could be read (a double press or key
+        repeat labels the next item unseen) and are excluded, and counted. It matches the UI's minimum dwell. `corrected_proxy`: item_id -> proxy label
+        recomputed with the fixed keyword matcher, reported next to the proxy stored at setup."""
         items = {r[0]: {'proxy': r[1], 'suggestion': r[2]} for r in
                  self.db.execute('SELECT item_id, proxy, suggestion FROM pilot_items')}
-        rows = self.db.execute('SELECT item_id, annotator, condition, label, seconds FROM pilot_labels').fetchall()
+        all_rows = self.db.execute('SELECT item_id, annotator, condition, label, seconds FROM pilot_labels').fetchall()
+        rows = [r for r in all_rows if r[4] is None or r[4] >= min_seconds]
+        excluded = [{'item_id': r[0], 'annotator': r[1], 'condition': r[2], 'seconds': r[4]} for r in all_rows
+                    if r[4] is not None and r[4] < min_seconds]
         meta = json.loads((self.db.execute("SELECT value FROM pilot_meta WHERE key = 'meta'").fetchone() or ['{}'])[0])
         by_cond: dict[str, dict] = {}
         for cond in ('assisted', 'manual'):
@@ -150,6 +156,9 @@ class PilotStudy:
             entry = {'labels': len(rs),
                      'median_seconds': round(median(secs), 1) if secs else None,
                      'agreement_with_proxy': round(float(np.mean(agree_proxy)), 3) if rs else None}
+            if corrected_proxy:
+                entry['agreement_with_corrected_proxy'] = round(float(np.mean(
+                    [r[3] == corrected_proxy[r[0]] for r in rs])), 3) if rs else None
             if cond == 'assisted':
                 wrong = [r for r in rs if items[r[0]]['suggestion'] != items[r[0]]['proxy']]
                 entry['followed_suggestion'] = round(float(np.mean([r[3] == items[r[0]]['suggestion'] for r in rs])), 3) if rs else None
@@ -177,6 +186,7 @@ class PilotStudy:
             kappa = round(float(cohen_kappa_score(a, b)), 3) if len(set(a) | set(b)) > 1 else 1.0
         return {'generated': time.strftime('%Y-%m-%d %H:%M'), 'setup': meta,
                 'items': len(items), 'annotators': len(per_annotator), 'labels': len(rows),
+                'excluded_as_unseen': {'rule': f'labels under {min_seconds} s', 'labels': excluded},
                 'by_condition': by_cond, 'per_annotator': per_annotator,
                 'inter_annotator': {'items_with_two_labels': len(both), 'cohen_kappa': kappa},
                 'reference': 'proxy label (keyword rule on the review condition), not clinical truth'}
@@ -237,6 +247,7 @@ def main() -> None:
     s2 = sub.add_parser('serve'); s2.add_argument('--db', required=True); s2.add_argument('--port', type=int, default=8765)
     s2.add_argument('--demo', action='store_true', help='create a synthetic pilot in --db first if it is empty')
     s3 = sub.add_parser('report'); s3.add_argument('--db', required=True); s3.add_argument('--out', default='outputs/labeling_pilot.json')
+    s3.add_argument('--csv', help='drug reviews CSV, to recompute each item\'s proxy label with the current matcher')
     args = ap.parse_args()
     if args.cmd == 'setup':
         Path(args.db).parent.mkdir(parents=True, exist_ok=True)
@@ -249,7 +260,13 @@ def main() -> None:
         from labeling.server import create_pilot_app
         uvicorn.run(create_pilot_app(PilotStudy(args.db)), host='127.0.0.1', port=args.port, log_level='warning')
     else:
-        report = PilotStudy(args.db).report()
+        corrected = None
+        if args.csv:
+            from analysis.sud_labels import contains_keyword
+            raw = pd.read_csv(args.csv, encoding='utf-8', encoding_errors='replace')
+            corrected = {f'p{u}': int(contains_keyword(c) or contains_keyword(d))
+                         for u, c, d in zip(raw.uniqueID, raw.condition, raw.drugName)}
+        report = PilotStudy(args.db).report(corrected_proxy=corrected)
         Path(args.out).write_text(json.dumps(report, indent=1))
         print(json.dumps(report, indent=1))
 

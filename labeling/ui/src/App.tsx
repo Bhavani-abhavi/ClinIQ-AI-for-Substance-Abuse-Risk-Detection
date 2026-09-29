@@ -4,6 +4,9 @@ import { HttpError, type Pending, dequeue, enqueue, readOutbox, withRetry, write
 import { type Action, actionToLabel, describeSuggestion, formatAccuracy, keyToAction, segments } from './logic';
 
 const NAME_KEY = 'cliniq-annotator';
+// Ignore labels this soon after a new review appears: a double press or key repeat would otherwise label an
+// item nobody has seen (4 of 60 pilot labels arrived 50-80 ms after the previous one).
+export const MIN_DWELL_MS = 300;
 
 function readName(): string {
   try {
@@ -138,6 +141,7 @@ function LabelView({ annotator, pilot }: { annotator: string; pilot: boolean }) 
 
   const act = useCallback(async (action: Action) => {
     if (!task || busy || save.kind === 'failed') return;   // resolve the unsaved label first
+    if (performance.now() - shownAt.current < MIN_DWELL_MS) return;
     const p: Pending = { item_id: task.item_id, label: actionToLabel(action),
                          seconds: Math.round((performance.now() - shownAt.current) / 100) / 10 };
     writeOutbox(annotator, enqueue(readOutbox(annotator), p));   // survives a reload before the server answers
@@ -152,6 +156,7 @@ function LabelView({ annotator, pilot }: { annotator: string; pilot: boolean }) 
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      if (e.repeat) return;                                   // a held key must not label several items
       const t = e.target as HTMLElement;
       const action = keyToAction(e.key, t.tagName === 'INPUT' || t.tagName === 'TEXTAREA');
       if (action === 'skip' && pilot) return;                 // every pilot item needs an answer

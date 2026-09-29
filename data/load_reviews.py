@@ -2,6 +2,8 @@ import html
 import os
 import sys
 import json
+import re
+
 import pandas as pd
 import psycopg2
 from psycopg2.extras import execute_values
@@ -55,11 +57,17 @@ SUD_KEYWORDS = [
     'drug addiction', 'addiction treatment',
 ]
 
+def _keyword_in(kw, t):
+    # "meth" must be a whole word: as a substring it matched methylphenidate, sulfamethoxazole,
+    # dextromethorphan and other unrelated drug names (803 false positives; see README).
+    return bool(re.search(r'\bmeth\b', t)) if kw == 'meth' else kw in t
+
+
 def contains_keyword(text):
     if pd.isna(text):
         return False
     t = text.lower()
-    return any(kw in t for kw in SUD_KEYWORDS)
+    return any(_keyword_in(kw, t) for kw in SUD_KEYWORDS)
 
 null_condition_mask = df['condition'].isna()
 null_condition_count = null_condition_mask.sum()
@@ -106,7 +114,7 @@ def classify_signal(row):
         ('withdrawal',      WITHDRAWAL_KW),
         ('smoking_cessation', SMOKING_KW),
         ('other_sud',       OTHER_SUD_KW),
-    ] for kw in kws if kw in combined}
+    ] for kw in kws if _keyword_in(kw, combined)}
 
     # polysubstance: multiple distinct substance groups present
     substance_groups = hits - {'withdrawal'}

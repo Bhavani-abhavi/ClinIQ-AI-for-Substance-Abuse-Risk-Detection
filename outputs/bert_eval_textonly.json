@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-28 17:23",
+ "generated": "2026-09-29 11:30",
  "model": "distilbert-base-uncased",
  "config": {
   "csv": "/Users/rahulchowdary/Downloads/drugsComTest_raw.csv",
@@ -9,17 +9,19 @@
   "batch": 16,
   "lr": 3e-05,
   "out": "outputs/bert_eval_textonly.json",
-  "text_only": true
+  "text_only": true,
+  "augment_identity": false,
+  "rules_only": false
  },
  "data": {
   "reviews": 52184,
-  "train": 7366,
-  "val": 818,
+  "train": 5349,
+  "val": 594,
   "eval": 600,
   "eval_positive": 300,
   "eval_by_category": {
-   "opioid": 60,
    "withdrawal": 60,
+   "opioid": 60,
    "other_sud": 60,
    "polysubstance": 60,
    "alcohol": 60
@@ -27,45 +29,46 @@
  },
  "label_basis": "keyword_proxy_not_clinician_adjudicated",
  "inputs": "review text only",
+ "augmentation": null,
  "results_same_600": {
   "bert_finetuned": {
-   "precision": 0.91,
-   "recall": 0.84,
-   "f1": 0.873,
-   "tp": 252,
-   "fp": 25,
-   "fn": 48,
-   "tn": 275,
-   "auroc": 0.95
+   "precision": 0.922,
+   "recall": 0.907,
+   "f1": 0.914,
+   "tp": 272,
+   "fp": 23,
+   "fn": 28,
+   "tn": 277,
+   "auroc": 0.963
   },
   "rule_based_static_keywords": {
-   "precision": 0.886,
-   "recall": 0.8,
-   "f1": 0.841,
-   "tp": 240,
-   "fp": 31,
-   "fn": 60,
-   "tn": 269
+   "precision": 0.915,
+   "recall": 0.787,
+   "f1": 0.846,
+   "tp": 236,
+   "fp": 22,
+   "fn": 64,
+   "tn": 278
   },
   "rule_based_text_only": {
-   "precision": 0.871,
-   "recall": 0.677,
-   "f1": 0.762,
-   "tp": 203,
-   "fp": 30,
-   "fn": 97,
-   "tn": 270
+   "precision": 0.906,
+   "recall": 0.707,
+   "f1": 0.794,
+   "tp": 212,
+   "fp": 22,
+   "fn": 88,
+   "tn": 278
   }
  },
  "original_600_results_different_draw": "rules F1 0.854; embedding F1 0.670; LLM+RAG precision 0.938 / recall 0.400 (outputs/method_comparison_results.csv; non-SUD half sampled randomly, rules with ICD-10 augmentation)",
  "timing_s": {
-  "train": 1752.3,
-  "predict_600": 10.72
+  "train": 1700.4,
+  "predict_600": 17.68
  },
  "wandb": {
   "mode": "offline",
   "project": "cliniq-sud-detection",
   "run": "distilbert-base-uncased-maxlen128-lr3e-05-textonly",
-  "run_id": "nkcre65v"
+  "run_id": "hv516rx2"
  }
 }

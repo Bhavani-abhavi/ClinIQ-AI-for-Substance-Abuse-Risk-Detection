@@ -17,18 +17,22 @@ test('pilot alternates assisted and manual items and counterbalances annotators'
   await expect(p1.getByRole('button', { name: /Skip/ })).toHaveCount(0);
   await expect(p1.getByTestId('pilot-progress')).toHaveText(/Item 1 of \d+/);
   await expect(p1.getByTestId('suggestion')).toContainText('Model suggests');          // assisted first
+  await p1.waitForTimeout(350);                 // a person needs to see the item first
   await p1.keyboard.press('1');
   await expect(p1.getByTestId('pilot-progress')).toHaveText(/Item 2 of/);
   await expect(p1.getByTestId('suggestion')).toContainText('Label this one on your own'); // then manual
   await expect(p1.locator('blockquote mark')).toHaveCount(0);
+  await p1.waitForTimeout(350);                 // a person needs to see the item first
   await p1.keyboard.press('s');                                                          // no skipping
   await expect(p1.getByTestId('pilot-progress')).toHaveText(/Item 2 of/);
+  await p1.waitForTimeout(350);                 // a person needs to see the item first
   await p1.keyboard.press('0');
   await expect(p1.getByTestId('pilot-progress')).toHaveText(/Item 3 of/);
 
   const p2 = await (await browser.newContext()).newPage();
   await signIn(p2, 'pilot-two');
   await expect(p2.getByTestId('suggestion')).toContainText('Label this one on your own'); // opposite order
+  await p2.waitForTimeout(350);                 // a person needs to see the item first
   await p2.keyboard.press('1');
   await expect(p2.getByTestId('suggestion')).toContainText('Model suggests');
 

@@ -6,6 +6,7 @@ keyword proxy for substance-use relevance, not a clinician-adjudicated diagnosis
 from __future__ import annotations
 
 import html
+import re
 
 import pandas as pd
 
@@ -31,13 +32,24 @@ GROUPS = [
 ]
 
 
+# Keywords that must match as whole words. "meth" used to match inside drug names (methylphenidate,
+# sulfamethoxazole, methylprednisolone, dextromethorphan, indomethacin ...), which made 803 of 3,316
+# proxy-positive reviews positive for no reason. Found in the September 2026 human labeling pilot.
+WHOLE_WORD = {'meth'}
+_WORD_RE = {kw: re.compile(r'\b' + re.escape(kw) + r'\b') for kw in WHOLE_WORD}
+
+
+def keyword_in(kw: str, text_lower: str) -> bool:
+    return bool(_WORD_RE[kw].search(text_lower)) if kw in _WORD_RE else kw in text_lower
+
+
 def contains_keyword(text) -> bool:
-    return isinstance(text, str) and any(kw in text.lower() for kw in SUD_KEYWORDS)
+    return isinstance(text, str) and any(keyword_in(kw, text.lower()) for kw in SUD_KEYWORDS)
 
 
 def signal_category(condition, drug, text) -> str:
     combined = ' '.join(str(x or '') for x in (condition, drug, text)).lower()
-    hits = {g for g, kws in GROUPS for kw in kws if kw in combined}
+    hits = {g for g, kws in GROUPS for kw in kws if keyword_in(kw, combined)}
     if len(hits - {'withdrawal'}) >= 2:
         return 'polysubstance'
     for g in ['opioid', 'alcohol', 'withdrawal', 'smoking_cessation', 'other_sud']:
